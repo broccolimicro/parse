@@ -18,12 +18,13 @@ bool debug = true;
 
 void internal(tokenizer &tokens, string internal, string debug_file, int debug_line, int offset)
 {
-	int number = tokens.line_number();
+	int number = tokens.line_number(offset);
+	int column_start = tokens.line_offset(offset);
+	string line = tokens.line(offset);
+	string file = tokens.file(offset);
 
-	int column_start = tokens.line_offset() + 1 + offset;
-	int column_end = 1;
-	string line = tokens.line();
 	string str;
+	int column_end = 1;
 	for (int j = 0; j < (int)line.size() && j < column_start; j++)
 	{
 		if (line[j] != '\t')
@@ -39,7 +40,7 @@ void internal(tokenizer &tokens, string internal, string debug_file, int debug_l
 	}
 
 	cout << debug_file << ":" << debug_line << ":";
-	cout << tokens.file() << ":" << number+1 << ":" << column_start << "-" << column_end << ": internal failure: " << internal << endl;
+	cout << file << ":" << number+1 << ":" << column_start << "-" << column_end << ": internal failure: " << internal << endl;
 	cout << line << endl;
 	cout << str << "^" << endl;
 
@@ -48,12 +49,13 @@ void internal(tokenizer &tokens, string internal, string debug_file, int debug_l
 
 void error(tokenizer &tokens, string error, string note, string debug_file, int debug_line, int offset)
 {
-	int number = tokens.line_number();
+	int number = tokens.line_number(offset);
+	int column_start = tokens.line_offset(offset);
+	string line = tokens.line(offset);
+	string file = tokens.file(offset);
 
-	int column_start = tokens.line_offset() + 1 + offset;
-	int column_end = 1;
-	string line = tokens.line();
 	string str;
+	int column_end = 1;
 	for (int j = 0; j < (int)line.size() && j < column_start; j++)
 	{
 		if (line[j] != '\t')
@@ -71,7 +73,7 @@ void error(tokenizer &tokens, string error, string note, string debug_file, int 
 	if (debug)
 		cout << debug_file << ":" << debug_line << ":";
 
-	cout << tokens.file() << ":" << number+1 << ":" << column_start << "-" << column_end << ": error: " << error << endl;
+	cout << file << ":" << number+1 << ":" << column_start << "-" << column_end << ": error: " << error << endl;
 	if (note != "")
 	{
 		if (debug)
@@ -87,12 +89,13 @@ void error(tokenizer &tokens, string error, string note, string debug_file, int 
 
 void warning(tokenizer &tokens, string warning, string note, string debug_file, int debug_line, int offset)
 {
-	int number = tokens.line_number();
+	int number = tokens.line_number(offset);
+	int column_start = tokens.line_offset(offset);
+	string line = tokens.line(offset);
+	string file = tokens.file(offset);
 
-	int column_start = tokens.line_offset() + 1 + offset;
-	int column_end = 1;
-	string line = tokens.line();
 	string str;
+	int column_end = 1;
 	for (int j = 0; j < (int)line.size() && j < column_start; j++)
 	{
 		if (line[j] != '\t')
@@ -110,13 +113,13 @@ void warning(tokenizer &tokens, string warning, string note, string debug_file, 
 	if (debug)
 		cout << debug_file << ":" << debug_line << ":";
 
-	cout << tokens.file() << ":" << number+1 << ":" << column_start << "-" << column_end << ": warning: " << warning << endl;
+	cout << file << ":" << number+1 << ":" << column_start << "-" << column_end << ": warning: " << warning << endl;
 	if (note != "")
 	{
 		if (debug)
 			cout << debug_file << ":" << debug_line << ":";
 
-		cout << tokens.file() << ":" << number+1 << ":" << column_start << "-" << column_end << ": note: " << note << endl;
+		cout << file << ":" << number+1 << ":" << column_start << "-" << column_end << ": note: " << note << endl;
 	}
 	cout << line << endl;
 	cout << str << "^" << endl;
@@ -126,12 +129,13 @@ void warning(tokenizer &tokens, string warning, string note, string debug_file, 
 
 void note(tokenizer &tokens, string note, string debug_file, int debug_line, int offset)
 {
-	int number = tokens.line_number();
+	int number = tokens.line_number(offset);
+	int column_start = tokens.line_offset(offset);
+	string line = tokens.line(offset);
+	string file = tokens.file(offset);
 
-	int column_start = tokens.line_offset() + 1 + offset;
-	int column_end = 1;
-	string line = tokens.line();
 	string str;
+	int column_end = 1;
 	for (int j = 0; j < (int)line.size() && j < column_start; j++)
 	{
 		if (line[j] != '\t')
@@ -149,7 +153,7 @@ void note(tokenizer &tokens, string note, string debug_file, int debug_line, int
 	if (debug)
 		cout << debug_file << ":" << debug_line << ":";
 
-	cout << tokens.file() << ":" << number+1 << ":" << column_start << "-" << column_end << ": note: " << note << endl;
+	cout << file << ":" << number+1 << ":" << column_start << "-" << column_end << ": note: " << note << endl;
 	cout << line << endl;
 	cout << str << "^" << endl;
 
@@ -160,11 +164,13 @@ void log(tokenizer &tokens, string log, string debug_file, int debug_line, int o
 {
 	if (verbose)
 	{
+		int number = tokens.line_number(offset);
+		string file = tokens.file(offset);
+
 		if (debug)
 			cout << debug_file << ":" << debug_line << ":";
 
-		if (tokens.segment_index >= 0 && tokens.segment_index < (int)tokens.segments.size() && tokens.index[tokens.segment_index] >= 0 && tokens.index[tokens.segment_index] < (int)tokens.segments[tokens.segment_index].buffer.size())
-			cout << tokens.file() << ":" << tokens.line_number()+1 << ":";
+		cout << file << ":" << number+1 << ":";
 
 		cout << "log:\t" << log << endl;
 

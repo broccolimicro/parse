@@ -140,12 +140,12 @@ struct tokenizer
 		return (peek_type(i) == "[" + type().debug_name + "]");
 	}
 
-	string file();
-	string line();
+	string file(int i = 0);
+	string line(int i = 0);
 	string location(int s, int o);
-	int line_number();
-	int line_offset();
-	int segment_offset();
+	int line_number(int i = 0);
+	int line_offset(int i = 0);
+	int segment_offset(int i = 0);
 
 	char curr_char();
 	char prev_char();

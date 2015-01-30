@@ -37,24 +37,28 @@ bool tokenizer::decrement(configuration &config, string debug_file, int debug_li
 	if (idx.first < max_required_level && max_required_level == (int)expected_hierarchy.size()-1)
 	{
 		string error_string = "expected ";
+		vector<string> expect_list;
 		for (int j = (int)expected_hierarchy.size()-1; j >= max_required_level; j--)
 		{
 			for (int k = 0; k < (int)expected_hierarchy[j].first.size(); k++)
 			{
-				if (j == 0 && k == (int)expected_hierarchy[j].first.size()-1 && number_expected(max_required_level) > 1)
-					error_string += "or ";
-
 				if (expected_hierarchy[j].first[k].size() > 2 && expected_hierarchy[j].first[k][0] == '[' && expected_hierarchy[j].first[k][expected_hierarchy[j].first[k].size()-1] == ']')
-					error_string += expected_hierarchy[j].first[k].substr(1, expected_hierarchy[j].first[k].size()-2) + " ";
+					expect_list.push_back(expected_hierarchy[j].first[k].substr(1, expected_hierarchy[j].first[k].size()-2));
 				else
-					error_string += "'" + expected_hierarchy[j].first[k] + "' ";
+					expect_list.push_back("'" + expected_hierarchy[j].first[k] + "'");
 			}
 		}
 
-		string note_string = "found " + peek_type(1);
+		if (expect_list.size() > 0)
+		error_string += expect_list[0];
 
+		for (int j = 1; j < (int)expect_list.size()-1; j++)
+			error_string += " " + expect_list[j];
 
-		error(*this, error_string, note_string, debug_file, debug_line);
+		if (expect_list.size() > 1)
+			error_string += " or " + expect_list.back();
+
+		error(*this, error_string, "", debug_file, debug_line, 1);
 
 		while ((idx = expected(config, 1)).first < max_required_level && next() != "");
 	}
@@ -116,7 +120,7 @@ pair<int, int> tokenizer::expected(configuration &config, int i)
 
 	if (results.size() > 1)
 	{
-		internal(*this, "ambiguous grammar", __FILE__, __LINE__);
+		internal(*this, "ambiguous grammar", __FILE__, __LINE__, 1);
 		for (int i = 0; i < (int)results.size(); i++)
 			note(*this, ::to_string(results[i].first) + " " + ::to_string(results[i].second) + " " + ::to_string(expected_hierarchy[results[i].first].second) + " " + expected_hierarchy[results[i].first].first[results[i].second], __FILE__, __LINE__);
 		return pair<int, int>(-1, -1);
@@ -208,18 +212,34 @@ bool tokenizer::is_next(string str, int i)
 	return (peek(i) == str);
 }
 
-string tokenizer::file()
+string tokenizer::file(int i)
 {
-	if (segment_index >= 0 && segment_index < (int)segments.size())
-		return segments[segment_index].name;
+	int temp_index = segment_index;
+	int inc = (i >= 0 ? 1 : -1);
+	while (temp_index < (int)segments.size() && temp_index >= 0 && (index[temp_index] + i >= (int)segments[temp_index].tokens.size() || index[temp_index]+i < 0))
+	{
+		i -= inc ? segments[temp_index].tokens.size() - index[temp_index] : -index[temp_index];
+		temp_index += inc;
+	}
+
+	if (temp_index >= 0 && temp_index < (int)segments.size())
+		return segments[temp_index].name;
 	else
 		return "";
 }
 
-string tokenizer::line()
+string tokenizer::line(int i)
 {
-	if (segment_index >= 0 && segment_index < (int)segments.size() && index[segment_index] >= 0 && index[segment_index] < (int)segments[segment_index].tokens.size())
-		return segments[segment_index].get_line(segments[segment_index].token_to_line(index[segment_index]));
+	int temp_index = segment_index;
+	int inc = (i >= 0 ? 1 : -1);
+	while (temp_index < (int)segments.size() && temp_index >= 0 && (index[temp_index] + i >= (int)segments[temp_index].tokens.size() || index[temp_index]+i < 0))
+	{
+		i -= inc ? segments[temp_index].tokens.size() - index[temp_index] : -index[temp_index];
+		temp_index += inc;
+	}
+
+	if (temp_index >= 0 && temp_index < (int)segments.size())
+		return segments[temp_index].get_line(segments[temp_index].token_to_line(index[temp_index]+i));
 	else
 		return "";
 }
@@ -240,26 +260,50 @@ string tokenizer::location(int s, int o)
 	return location;
 }
 
-int tokenizer::line_number()
+int tokenizer::line_number(int i)
 {
-	if (segment_index >= 0 && segment_index < (int)segments.size() && index[segment_index] >= 0 && index[segment_index] < (int)segments[segment_index].tokens.size())
-		return segments[segment_index].token_to_line(index[segment_index]);
+	int temp_index = segment_index;
+	int inc = (i >= 0 ? 1 : -1);
+	while (temp_index < (int)segments.size() && temp_index >= 0 && (index[temp_index] + i >= (int)segments[temp_index].tokens.size() || index[temp_index]+i < 0))
+	{
+		i -= inc ? segments[temp_index].tokens.size() - index[temp_index] : -index[temp_index];
+		temp_index += inc;
+	}
+
+	if (temp_index >= 0 && temp_index < (int)segments.size())
+		return segments[temp_index].token_to_line(index[temp_index]+i);
 	else
 		return -1;
 }
 
-int tokenizer::line_offset()
+int tokenizer::line_offset(int i)
 {
-	if (segment_index >= 0 && segment_index < (int)segments.size() && index[segment_index] >= 0 && index[segment_index] < (int)segments[segment_index].tokens.size())
-		return segments[segment_index].tokens[index[segment_index]].start - segments[segment_index].lines[segments[segment_index].token_to_line(index[segment_index])];
+	int temp_index = segment_index;
+	int inc = (i >= 0 ? 1 : -1);
+	while (temp_index < (int)segments.size() && temp_index >= 0 && (index[temp_index] + i >= (int)segments[temp_index].tokens.size() || index[temp_index]+i < 0))
+	{
+		i -= inc ? segments[temp_index].tokens.size() - index[temp_index] : -index[temp_index];
+		temp_index += inc;
+	}
+
+	if (temp_index >= 0 && temp_index < (int)segments.size())
+		return segments[temp_index].tokens[index[temp_index]+i].start - segments[temp_index].lines[segments[temp_index].token_to_line(index[temp_index]+i)];
 	else
 		return -1;
 }
 
-int tokenizer::segment_offset()
+int tokenizer::segment_offset(int i)
 {
-	if (segment_index >= 0 && segment_index < (int)segments.size() && index[segment_index] >= 0 && index[segment_index] < (int)segments[segment_index].tokens.size())
-		return segments[segment_index].tokens[index[segment_index]].start;
+	int temp_index = segment_index;
+	int inc = (i >= 0 ? 1 : -1);
+	while (temp_index < (int)segments.size() && temp_index >= 0 && (index[temp_index] + i >= (int)segments[temp_index].tokens.size() || index[temp_index]+i < 0))
+	{
+		i -= inc ? segments[temp_index].tokens.size() - index[temp_index] : -index[temp_index];
+		temp_index += inc;
+	}
+
+	if (temp_index >= 0 && temp_index < (int)segments.size())
+		return segments[temp_index].tokens[index[temp_index]+i].start;
 	else
 		return -1;
 }
