@@ -7,8 +7,8 @@
 
 #include "../parse.h"
 
-#ifndef line_comment_h
-#define line_comment_h
+#ifndef parse_default_line_comment_h
+#define parse_default_line_comment_h
 
 namespace parse
 {

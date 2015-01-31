@@ -5,11 +5,11 @@
  *      Author: nbingham
  */
 
-#include "common.h"
+#include <common/standard.h>
 #include "token.h"
 
-#ifndef segment_h
-#define segment_h
+#ifndef parse_segment_h
+#define parse_segment_h
 
 struct segment
 {

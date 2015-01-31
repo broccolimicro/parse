@@ -5,11 +5,11 @@
  *      Author: nbingham
  */
 
-#include "common.h"
+#include <common/standard.h>
 #include "segment.h"
 
-#ifndef configuration_h
-#define configuration_h
+#ifndef parse_configuration_h
+#define parse_configuration_h
 
 struct tokenizer;
 

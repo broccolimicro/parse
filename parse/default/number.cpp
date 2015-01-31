@@ -6,7 +6,6 @@
  */
 
 #include "number.h"
-#include "../common.h"
 
 namespace parse
 {

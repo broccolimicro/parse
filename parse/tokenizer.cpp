@@ -8,7 +8,6 @@
 #include "tokenizer.h"
 #include "configuration.h"
 #include "message.h"
-#include "common.h"
 
 tokenizer::tokenizer()
 {

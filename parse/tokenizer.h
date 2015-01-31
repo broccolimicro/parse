@@ -5,12 +5,12 @@
  *      Author: nbingham
  */
 
-#include "common.h"
+#include <common/text.h>
 #include "segment.h"
 #include "token.h"
 
-#ifndef tokenizer_h
-#define tokenizer_h
+#ifndef parse_tokenizer_h
+#define parse_tokenizer_h
 
 struct tokenizer;
 struct configuration;

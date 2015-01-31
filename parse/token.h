@@ -5,10 +5,8 @@
  *      Author: nbingham
  */
 
-#include "common.h"
-
-#ifndef token_h
-#define token_h
+#ifndef parse_token_h
+#define parse_token_h
 
 struct token
 {

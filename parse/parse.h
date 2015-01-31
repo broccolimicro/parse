@@ -5,8 +5,8 @@
  *      Author: nbingham
  */
 
-#ifndef parse_h
-#define parse_h
+#ifndef parse_parse_h
+#define parse_parse_h
 
 #include "token.h"
 #include "segment.h"

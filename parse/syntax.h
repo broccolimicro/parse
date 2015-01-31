@@ -5,10 +5,10 @@
  *      Author: nbingham
  */
 
-#include "common.h"
+#include <common/standard.h>
 
-#ifndef syntax_h
-#define syntax_h
+#ifndef parse_syntax_h
+#define parse_syntax_h
 
 namespace parse
 {

@@ -7,8 +7,8 @@
 
 #include "../parse.h"
 
-#ifndef number_h
-#define number_h
+#ifndef parse_default_number_h
+#define parse_default_number_h
 
 namespace parse
 {

@@ -5,10 +5,10 @@
  *      Author: nbingham
  */
 
-#include "common.h"
+#include <common/standard.h>
 
-#ifndef message_h
-#define message_h
+#ifndef parse_message_h
+#define parse_message_h
 
 struct tokenizer;
 

@@ -7,8 +7,8 @@
 
 #include "../parse.h"
 
-#ifndef instance_h
-#define instance_h
+#ifndef parse_default_instance_h
+#define parse_default_instance_h
 
 namespace parse
 {
