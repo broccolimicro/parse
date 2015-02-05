@@ -12,7 +12,6 @@
 #include "segment.h"
 #include "tokenizer.h"
 #include "configuration.h"
-#include "message.h"
 #include "syntax.h"
 
 #endif

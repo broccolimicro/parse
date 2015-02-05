@@ -6,6 +6,7 @@
  */
 
 #include <common/text.h>
+#include <common/message.h>
 #include "segment.h"
 #include "token.h"
 
@@ -55,6 +56,12 @@ struct tokenizer
 
 	vector<pair<vector<string>, bool> > expected_hierarchy;
 	string found_type;
+
+	void internal(string internal, string debug_file, int debug_line, int offset = 0);
+	void error(string error, string debug_file, int debug_line, int offset = 0);
+	void warning(string warning, string debug_file, int debug_line, int offset = 0);
+	void note(string note, string debug_file, int debug_line, int offset = 0);
+	void log(string log, string debug_file, int debug_line, int offset = 0);
 
 	template <class type>
 	void register_syntax()
@@ -115,7 +122,7 @@ struct tokenizer
 	void expect()
 	{
 		if (!syntax_registered<type>() && !token_registered<type>())
-			internal(*this, "syntax or token not registered \"" + type().debug_name + "\"", __FILE__, __LINE__);
+			internal("syntax or token not registered \"" + type().debug_name + "\"", __FILE__, __LINE__);
 		expected_hierarchy.back().first.push_back("[" + type().debug_name + "]");
 	}
 	

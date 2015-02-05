@@ -7,7 +7,6 @@
 
 #include "configuration.h"
 #include "tokenizer.h"
-#include "message.h"
 
 configuration::configuration()
 {
@@ -24,7 +23,7 @@ void configuration::load(tokenizer &tokens, string filename, string base)
 		filename = base.substr(0, base.find_last_of("\\/")+1) + filename;
 
 	if (tokens.segment_loading(filename))
-		error(tokens, "cycle found in include graph", "", __FILE__, __LINE__);
+		tokens.error("cycle found in include graph", __FILE__, __LINE__);
 	else if (!tokens.segment_loaded(filename))
 	{
 		ifstream fin;
@@ -33,7 +32,7 @@ void configuration::load(tokenizer &tokens, string filename, string base)
 			fin.open((import_directories[i] + filename).c_str(), ios::binary | ios::in);
 
 		if (!fin.is_open())
-			error(tokens, "file not found '" + filename + "'", "", __FILE__, __LINE__);
+			tokens.error("file not found '" + filename + "'", __FILE__, __LINE__);
 		else
 		{
 			fin.seekg(0, ios::end);

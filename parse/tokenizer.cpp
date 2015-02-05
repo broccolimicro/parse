@@ -7,7 +7,6 @@
 
 #include "tokenizer.h"
 #include "configuration.h"
-#include "message.h"
 
 tokenizer::tokenizer()
 {
@@ -18,6 +17,150 @@ tokenizer::tokenizer()
 tokenizer::~tokenizer()
 {
 
+}
+
+void tokenizer::internal(string internal, string debug_file, int debug_line, int offset)
+{
+	int number = line_number(offset);
+	int column_start = line_offset(offset);
+	string line = this->line(offset);
+	string file = this->file(offset);
+
+	string str;
+	int column_end = 1;
+	for (int j = 0; j < (int)line.size() && j < column_start; j++)
+	{
+		if (line[j] != '\t')
+		{
+			str.push_back(' ');
+			column_end++;
+		}
+		else
+		{
+			str.push_back('\t');
+			column_end+=8;
+		}
+	}
+
+	string location = file + ":" + ::to_string(number+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
+
+	::internal(location, internal, debug_file, debug_line);
+	cout << line << endl;
+	cout << str << "^" << endl;
+}
+
+void tokenizer::error(string error, string debug_file, int debug_line, int offset)
+{
+	int number = line_number(offset);
+	int column_start = line_offset(offset);
+	string line = this->line(offset);
+	string file = this->file(offset);
+
+	string str;
+	int column_end = 1;
+	for (int j = 0; j < (int)line.size() && j < column_start; j++)
+	{
+		if (line[j] != '\t')
+		{
+			str.push_back(' ');
+			column_end++;
+		}
+		else
+		{
+			str.push_back('\t');
+			column_end+=8;
+		}
+	}
+
+	string location = file + ":" + ::to_string(number+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
+	::error(location, error, debug_file, debug_line);
+	cout << line << endl;
+	cout << str << "^" << endl;
+}
+
+void tokenizer::warning(string warning, string debug_file, int debug_line, int offset)
+{
+	int number = line_number(offset);
+	int column_start = line_offset(offset);
+	string line = this->line(offset);
+	string file = this->file(offset);
+
+	string str;
+	int column_end = 1;
+	for (int j = 0; j < (int)line.size() && j < column_start; j++)
+	{
+		if (line[j] != '\t')
+		{
+			str.push_back(' ');
+			column_end++;
+		}
+		else
+		{
+			str.push_back('\t');
+			column_end+=8;
+		}
+	}
+
+	string location = file + ":" + ::to_string(number+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
+	::warning(location, warning, debug_file, debug_line);
+	cout << line << endl;
+	cout << str << "^" << endl;
+}
+
+void tokenizer::note(string note, string debug_file, int debug_line, int offset)
+{
+	int number = line_number(offset);
+	int column_start = line_offset(offset);
+	string line = this->line(offset);
+	string file = this->file(offset);
+
+	string str;
+	int column_end = 1;
+	for (int j = 0; j < (int)line.size() && j < column_start; j++)
+	{
+		if (line[j] != '\t')
+		{
+			str.push_back(' ');
+			column_end++;
+		}
+		else
+		{
+			str.push_back('\t');
+			column_end+=8;
+		}
+	}
+
+	string location = file + ":" + ::to_string(number+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
+	::note(location, note, debug_file, debug_line);
+	cout << line << endl;
+	cout << str << "^" << endl;
+}
+
+void tokenizer::log(string log, string debug_file, int debug_line, int offset)
+{
+	int number = line_number(offset);
+	int column_start = line_offset(offset);
+	string line = this->line(offset);
+	string file = this->file(offset);
+
+	string str;
+	int column_end = 1;
+	for (int j = 0; j < (int)line.size() && j < column_start; j++)
+	{
+		if (line[j] != '\t')
+		{
+			str.push_back(' ');
+			column_end++;
+		}
+		else
+		{
+			str.push_back('\t');
+			column_end+=8;
+		}
+	}
+
+	string location = file + ":" + ::to_string(number+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
+	::log(location, log, debug_file, debug_line);
 }
 
 void tokenizer::increment(bool required)
@@ -57,7 +200,7 @@ bool tokenizer::decrement(configuration &config, string debug_file, int debug_li
 		if (expect_list.size() > 1)
 			error_string += " or " + expect_list.back();
 
-		error(*this, error_string, "", debug_file, debug_line, 1);
+		error(error_string, debug_file, debug_line, 1);
 
 		while ((idx = expected(config, 1)).first < max_required_level && next() != "");
 	}
@@ -119,9 +262,9 @@ pair<int, int> tokenizer::expected(configuration &config, int i)
 
 	if (results.size() > 1)
 	{
-		internal(*this, "ambiguous grammar", __FILE__, __LINE__, 1);
+		internal("ambiguous grammar", __FILE__, __LINE__, 1);
 		for (int i = 0; i < (int)results.size(); i++)
-			note(*this, ::to_string(results[i].first) + " " + ::to_string(results[i].second) + " " + ::to_string(expected_hierarchy[results[i].first].second) + " " + expected_hierarchy[results[i].first].first[results[i].second], __FILE__, __LINE__);
+			::note("", ::to_string(results[i].first) + " " + ::to_string(results[i].second) + " " + ::to_string(expected_hierarchy[results[i].first].second) + " " + expected_hierarchy[results[i].first].first[results[i].second], __FILE__, __LINE__);
 		return pair<int, int>(-1, -1);
 	}
 	else if (results.size() == 1)
@@ -194,14 +337,14 @@ void tokenizer::insert(configuration &config, string name, string contents)
 					matching_tokens.push_back(i);
 
 			if (matching_comments.size() + matching_tokens.size() > 1)
-				internal(location(segment_index, offset+1), "ambiguous token set", __FILE__, __LINE__);
+				::internal(location(segment_index, offset+1), "ambiguous token set", __FILE__, __LINE__);
 
 			if (matching_comments.size() > 0)
 				comment_registry[matching_comments.back()].second(*this);
 			else if (matching_tokens.size() > 0)
 				segments[segment_index].tokens.push_back(matching_tokens.back()->second.consume(*this));
 			else
-				error(location(segment_index, offset+1), (string)"stray '" + character + "'", "", __FILE__, __LINE__);
+				::error(location(segment_index, offset+1), (string)"stray '" + character + "'", __FILE__, __LINE__);
 		}
 	}
 }
