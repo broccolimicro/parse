@@ -19,7 +19,7 @@ symbol::~symbol()
 
 }
 
-token symbol::consume(tokenizer &tokens)
+token symbol::consume(tokenizer &tokens, void *data)
 {
 	token result;
 	result.type = tokens.token_type<symbol>();
@@ -50,7 +50,7 @@ token symbol::consume(tokenizer &tokens)
 	return result;
 }
 
-bool symbol::is_next(configuration &config, tokenizer &tokens, int i)
+bool symbol::is_next(tokenizer &tokens, int i, void *data)
 {
 	char character = tokens.peek_char(i);
 

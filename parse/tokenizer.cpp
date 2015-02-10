@@ -6,7 +6,6 @@
  */
 
 #include "tokenizer.h"
-#include "configuration.h"
 
 tokenizer::tokenizer()
 {
@@ -163,19 +162,107 @@ void tokenizer::log(string log, string debug_file, int debug_line, int offset)
 	::log(location, log, debug_file, debug_line);
 }
 
-void tokenizer::increment(bool required)
+void tokenizer::syntax_start(parse::syntax *syntax)
 {
-	expected_hierarchy.push_back(pair<vector<string>, bool>(vector<string>(), required));
+	syntax->segment_name = segments[segment_index].name;
+	syntax->start = index[segment_index]+1;
 }
 
-bool tokenizer::decrement(configuration &config, string debug_file, int debug_line)
+void tokenizer::syntax_end(parse::syntax *syntax)
+{
+	if (syntax->start != -1)
+	{
+		syntax->end = index[segment_index];
+		syntax->valid = true;
+	}
+}
+
+bool tokenizer::save(string key, const parse::syntax *syntax)
+{
+	if (syntax == NULL || !syntax->valid)
+		return false;
+	else
+		return bookmarks.insert(pair<string, pair<string, int> >(key, pair<string, int>(syntax->segment_name, syntax->start))).second;
+}
+
+bool tokenizer::load(const parse::syntax *syntax)
+{
+	if (syntax == NULL || !syntax->valid)
+		return false;
+
+	bool found = false;
+	for (int i = 0; i < (int)segments.size() && !found; i++)
+		if (segments[i].name == syntax->segment_name)
+		{
+			segment_index = i;
+			found = true;
+		}
+
+	if (found)
+	{
+		index[segment_index] = syntax->start;
+		return true;
+	}
+	else
+		return false;
+}
+
+bool tokenizer::load(string key)
+{
+	map<string, pair<string, int> >::iterator iter = bookmarks.find(key);
+	if (iter != bookmarks.end())
+	{
+		bool found = false;
+		for (int i = 0; i < (int)segments.size() && !found; i++)
+			if (segments[i].name == iter->second.first)
+			{
+				segment_index = i;
+				found = true;
+			}
+
+		if (found)
+		{
+			index[segment_index] = iter->second.second;
+			return true;
+		}
+		else
+			return false;
+	}
+	else
+		return false;
+}
+
+bool tokenizer::erase(string key)
+{
+	map<string, pair<string, int> >::iterator iter = bookmarks.find(key);
+	if (iter != bookmarks.end())
+	{
+		bookmarks.erase(iter);
+		return true;
+	}
+	else
+		return false;
+}
+
+tokenizer::level tokenizer::increment(bool required)
+{
+	expected_hierarchy.push_back(pair<vector<string>, bool>(vector<string>(), required));
+	return (expected_hierarchy.end()-1);
+}
+
+tokenizer::level tokenizer::increment(level it, bool required)
+{
+	return expected_hierarchy.insert(it, pair<vector<string>, bool>(vector<string>(), required));
+}
+
+bool tokenizer::decrement(string debug_file, int debug_line, void *data)
 {
 	pair<int, int> idx(-1, -1);
 
 	int max_required_level;
 	for (max_required_level = (int)expected_hierarchy.size()-1; max_required_level >= 0 && !expected_hierarchy[max_required_level].second; max_required_level--);
 
-	idx = expected(config, 1);
+	idx = expected(1, data);
 	if (idx.first < max_required_level && max_required_level == (int)expected_hierarchy.size()-1)
 	{
 		string error_string = "expected ";
@@ -202,7 +289,7 @@ bool tokenizer::decrement(configuration &config, string debug_file, int debug_li
 
 		error(error_string, debug_file, debug_line, 1);
 
-		while ((idx = expected(config, 1)).first < max_required_level && next() != "");
+		while ((idx = expected(1, data)).first < max_required_level && next() != "");
 	}
 
 	if (idx.first < (int)expected_hierarchy.size() - 1)
@@ -225,7 +312,17 @@ void tokenizer::expect(vector<string> &s)
 	expected_hierarchy.back().first.insert(expected_hierarchy.back().first.end(), s.begin(), s.end());
 }
 
-pair<int, int> tokenizer::expected(configuration &config, int i)
+void tokenizer::expect(level it, string s)
+{
+	it->first.push_back(s);
+}
+
+void tokenizer::expect(level it, vector<string> &s)
+{
+	it->first.insert(it->first.end(), s.begin(), s.end());
+}
+
+pair<int, int> tokenizer::expected(int i, void *data)
 {
 	vector<pair<int, int> > results;
 	if (segment_index >= 0 && segment_index < (int)segments.size())
@@ -253,7 +350,7 @@ pair<int, int> tokenizer::expected(configuration &config, int i)
 				for (syntax_registry_iterator iter = syntax_registry.begin(); iter != syntax_registry.end(); iter++)
 				{
 					j2 = std::find(expected_hierarchy[j].first.begin(), expected_hierarchy[j].first.end(), iter->first);
-					if (j2 != expected_hierarchy[j].first.end() && iter->second(config, *this, i))
+					if (j2 != expected_hierarchy[j].first.end() && iter->second(*this, i, data))
 						results.push_back(pair<int, int>(j, j2 - expected_hierarchy[j].first.begin()));
 				}
 			}
@@ -297,7 +394,7 @@ bool tokenizer::found(string s)
 	return (found_type == s);
 }
 
-void tokenizer::insert(configuration &config, string name, string contents)
+void tokenizer::insert(string name, string contents, void *data)
 {
 	segment_index++;
 
@@ -314,9 +411,7 @@ void tokenizer::insert(configuration &config, string name, string contents)
 	{
 		char character = peek_char(1);
 		if (character == '\r')
-		{
 			segments[segment_index].buffer.erase(offset+1, 1);
-		}
 		else if (character == '\n')
 		{
 			segments[segment_index].lines.push_back(offset+2);
@@ -329,20 +424,20 @@ void tokenizer::insert(configuration &config, string name, string contents)
 			vector<int> matching_comments;
 			vector<token_registry_iterator> matching_tokens;
 			for (int i = 0; i < (int)comment_registry.size(); i++)
-				if (comment_registry[i].first(config, *this, 1))
+				if (comment_registry[i].first(*this, 1, data))
 					matching_comments.push_back(i);
 
 			for (token_registry_iterator i = token_registry.begin(); i != token_registry.end(); i++)
-				if (i->second.is_next(config, *this, 1))
+				if (i->second.is_next(*this, 1, data))
 					matching_tokens.push_back(i);
 
 			if (matching_comments.size() + matching_tokens.size() > 1)
 				::internal(location(segment_index, offset+1), "ambiguous token set", __FILE__, __LINE__);
 
 			if (matching_comments.size() > 0)
-				comment_registry[matching_comments.back()].second(*this);
+				comment_registry[matching_comments.back()].second(*this, data);
 			else if (matching_tokens.size() > 0)
-				segments[segment_index].tokens.push_back(matching_tokens.back()->second.consume(*this));
+				segments[segment_index].tokens.push_back(matching_tokens.back()->second.consume(*this, data));
 			else
 				::error(location(segment_index, offset+1), (string)"stray '" + character + "'", __FILE__, __LINE__);
 		}

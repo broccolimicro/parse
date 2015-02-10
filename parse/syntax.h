@@ -14,9 +14,18 @@ namespace parse
 {
 struct syntax
 {
-	syntax() { debug_name = "syntax"; valid = false; }
+	syntax()
+	{
+		debug_name = "syntax";
+		valid = false;
+		segment_name = "";
+		start = -1;
+		end = -1;
+	}
 	virtual ~syntax() {}
 
+	string segment_name;
+	int start, end;
 	string debug_name;
 	bool valid;
 

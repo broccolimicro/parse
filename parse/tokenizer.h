@@ -9,15 +9,15 @@
 #include <common/message.h>
 #include "segment.h"
 #include "token.h"
+#include "syntax.h"
 
 #ifndef parse_tokenizer_h
 #define parse_tokenizer_h
 
 struct tokenizer;
-struct configuration;
 
-typedef bool (*is_next_ptr)(configuration&, tokenizer&, int);
-typedef token (*consume_ptr)(tokenizer&);
+typedef bool (*is_next_ptr)(tokenizer&, int, void*);
+typedef token (*consume_ptr)(tokenizer&, void *);
 
 struct token_entry
 {
@@ -55,13 +55,24 @@ struct tokenizer
 	int segment_index;
 
 	vector<pair<vector<string>, bool> > expected_hierarchy;
+	typedef typename vector<pair<vector<string>, bool> >::iterator level;
 	string found_type;
+
+	map<string, pair<string, int> > bookmarks;
 
 	void internal(string internal, string debug_file, int debug_line, int offset = 0);
 	void error(string error, string debug_file, int debug_line, int offset = 0);
 	void warning(string warning, string debug_file, int debug_line, int offset = 0);
 	void note(string note, string debug_file, int debug_line, int offset = 0);
 	void log(string log, string debug_file, int debug_line, int offset = 0);
+
+	void syntax_start(parse::syntax *syntax);
+	void syntax_end(parse::syntax *syntax);
+
+	bool save(string key, const parse::syntax *syntax);
+	bool load(const parse::syntax *syntax);
+	bool load(string key);
+	bool erase(string key);
 
 	template <class type>
 	void register_syntax()
@@ -113,8 +124,9 @@ struct tokenizer
 		return token_registry.find("[" + type().debug_name + "]")->second.type;
 	}
 
-	void increment(bool required = true);
-	bool decrement(configuration &config, string debug_file, int debug_line);
+	level increment(bool required = true);
+	level increment(level it, bool required = true);
+	bool decrement(string debug_file, int debug_line, void *data = NULL);
 
 	void expect(string s);
 	void expect(vector<string> &s);
@@ -125,8 +137,19 @@ struct tokenizer
 			internal("syntax or token not registered \"" + type().debug_name + "\"", __FILE__, __LINE__);
 		expected_hierarchy.back().first.push_back("[" + type().debug_name + "]");
 	}
+
+	void expect(level it, string s);
+	void expect(level it, vector<string> &s);
+	template <class type>
+	void expect(level it)
+	{
+		if (!syntax_registered<type>() && !token_registered<type>())
+			internal("syntax or token not registered \"" + type().debug_name + "\"", __FILE__, __LINE__);
+		it->first.push_back("[" + type().debug_name + "]");
+	}
 	
-	pair<int, int> expected(configuration &config, int off = 1);
+	pair<int, int> expected(int off = 1, void *data = NULL);
+	pair<int, int> expected(int off = 1);
 	pair<int, int> expected(string s);
 
 	int number_expected(int required_index);
@@ -138,7 +161,7 @@ struct tokenizer
 		return (found_type == ("[" + type().debug_name + "]"));
 	}
 
-	void insert(configuration &config, string name, string contents);
+	void insert(string name, string contents, void *data = NULL);
 
 	bool is_next(string str, int i = 1);
 	template <class type>

@@ -19,7 +19,7 @@ text::~text()
 
 }
 
-token text::consume(tokenizer &tokens)
+token text::consume(tokenizer &tokens, void *data)
 {
 	token result;
 	result.type = tokens.token_type<text>();
@@ -53,7 +53,7 @@ token text::consume(tokenizer &tokens)
 	return result;
 }
 
-bool text::is_next(configuration &config, tokenizer &tokens, int i)
+bool text::is_next(tokenizer &tokens, int i, void *data)
 {
 	return (tokens.peek_char(i) == '\'' || tokens.peek_char(i) == '\"');
 }

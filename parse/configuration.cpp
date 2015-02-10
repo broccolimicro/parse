@@ -41,7 +41,7 @@ void configuration::load(tokenizer &tokens, string filename, string base)
 			fin.seekg(0, ios::beg);
 			fin.read(&buffer[0], size);
 			fin.clear();
-			tokens.insert(*this, filename, buffer);
+			tokens.insert(filename, buffer, this);
 		}
 	}
 }
@@ -60,14 +60,4 @@ void configuration::add_import_directory(string filename)
 void configuration::set_working_directory(string filename)
 {
 	working_directory = filename.substr(0, filename.find_last_of("/\\")+1);
-}
-
-void configuration::load_language_handles(string directory)
-{
-
-}
-
-bool configuration::has_language(string language_name)
-{
-	return (language_handles.find(language_name) != language_handles.end());
 }

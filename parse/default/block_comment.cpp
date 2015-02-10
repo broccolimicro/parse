@@ -18,7 +18,7 @@ block_comment::~block_comment()
 
 }
 
-token block_comment::consume(tokenizer &tokens)
+token block_comment::consume(tokenizer &tokens, void *data)
 {
 	token result;
 	result.type = tokens.comment_type<block_comment>();
@@ -53,7 +53,7 @@ token block_comment::consume(tokenizer &tokens)
 	return result;
 }
 
-bool block_comment::is_next(configuration &config, tokenizer &tokens, int i)
+bool block_comment::is_next(tokenizer &tokens, int i, void *data)
 {
 	return (tokens.peek_char(i) == '/' && tokens.peek_char(i+1) == '*');
 }

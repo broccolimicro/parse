@@ -18,7 +18,6 @@ struct configuration
 	configuration();
 	~configuration();
 
-	map<string, void*> language_handles;
 	vector<string> import_directories;
 	vector<string> input_files;
 	string working_directory;
@@ -26,8 +25,6 @@ struct configuration
 	void load(tokenizer &tokens, string filename, string base = "");
 	void add_import_directory(string directory);
 	void set_working_directory(string filename);
-	void load_language_handles(string directory);
-	bool has_language(string language_name);
 };
 
 #endif

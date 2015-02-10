@@ -19,8 +19,8 @@ struct instance
 
 	string debug_name;
 
-	static token consume(tokenizer &tokens);
-	static bool is_next(configuration &config, tokenizer &tokens, int i = 1);
+	static token consume(tokenizer &tokens, void *data = NULL);
+	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
 };
 }
 
