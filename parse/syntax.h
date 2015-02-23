@@ -30,6 +30,7 @@ struct syntax
 	bool valid;
 
 	virtual string to_string(string tab = "") const = 0;
+	virtual syntax *clone() const = 0;
 
 	template <class type>
 	bool is_a()

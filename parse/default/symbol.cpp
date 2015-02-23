@@ -28,12 +28,11 @@ token symbol::consume(tokenizer &tokens, void *data)
 	string one(1, tokens.next_char());
 	string two = one + string(1, tokens.peek_char(1));
 	string three = two + string(1, tokens.peek_char(2));
-	string total = one;
 
 	if (three == ">>=" || three == "<<=")
 	{
-		total += tokens.next_char();
-		total += tokens.next_char();
+		tokens.next_char();
+		tokens.next_char();
 	}
 	else if (two == ":=" || two == "->" || two == "==" || two == "~=" ||
 		two == "<=" || two == ">=" || two == "&&" || two == "||" ||
@@ -43,7 +42,7 @@ token symbol::consume(tokenizer &tokens, void *data)
 		two == "&=" || two == "|=" || two == "^=" || two == "++" ||
 		two == "--" || two == "%=")
 	{
-		total += tokens.next_char();
+		tokens.next_char();
 	}
 
 	result.end = tokens.offset+1;

@@ -43,7 +43,7 @@ token text::consume(tokenizer &tokens, void *data)
 			done = true;
 		else if (character == '\0')
 		{
-			tokens.error((string)"expected \'" + base + "\'", __FILE__, __LINE__);
+			tokens.token_error((string)"expected \'" + base + "\'", __FILE__, __LINE__);
 			result.end = tokens.offset+1;
 			return result;
 		}

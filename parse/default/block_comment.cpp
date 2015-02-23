@@ -37,7 +37,7 @@ token block_comment::consume(tokenizer &tokens, void *data)
 
 		if (character == '\0')
 		{
-			tokens.error("expected '*/'", __FILE__, __LINE__);
+			tokens.token_error("expected '*/'", __FILE__, __LINE__);
 			result.end = tokens.offset;
 			return result;
 		}

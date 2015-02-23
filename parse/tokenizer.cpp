@@ -18,148 +18,78 @@ tokenizer::~tokenizer()
 
 }
 
-void tokenizer::internal(string internal, string debug_file, int debug_line, int offset)
+void tokenizer::internal(string internal, string debug_file, int debug_line, int token_offset, int character_offset)
 {
-	int number = line_number(offset);
-	int column_start = line_offset(offset);
-	string line = this->line(offset);
-	string file = this->file(offset);
-
-	string str;
-	int column_end = 1;
-	for (int j = 0; j < (int)line.size() && j < column_start; j++)
-	{
-		if (line[j] != '\t')
-		{
-			str.push_back(' ');
-			column_end++;
-		}
-		else
-		{
-			str.push_back('\t');
-			column_end+=8;
-		}
-	}
-
-	string location = file + ":" + ::to_string(number+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
-
-	::internal(location, internal, debug_file, debug_line);
+	string line, space;
+	::internal(relative_location(token_offset, character_offset, &line, &space), internal, debug_file, debug_line);
 	cout << line << endl;
-	cout << str << "^" << endl;
+	cout << space << "^" << endl;
 }
 
-void tokenizer::error(string error, string debug_file, int debug_line, int offset)
+void tokenizer::error(string error, string debug_file, int debug_line, int token_offset, int character_offset)
 {
-	int number = line_number(offset);
-	int column_start = line_offset(offset);
-	string line = this->line(offset);
-	string file = this->file(offset);
-
-	string str;
-	int column_end = 1;
-	for (int j = 0; j < (int)line.size() && j < column_start; j++)
-	{
-		if (line[j] != '\t')
-		{
-			str.push_back(' ');
-			column_end++;
-		}
-		else
-		{
-			str.push_back('\t');
-			column_end+=8;
-		}
-	}
-
-	string location = file + ":" + ::to_string(number+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
-	::error(location, error, debug_file, debug_line);
+	string line, space;
+	::error(relative_location(token_offset, character_offset, &line, &space), error, debug_file, debug_line);
 	cout << line << endl;
-	cout << str << "^" << endl;
+	cout << space << "^" << endl;
 }
 
-void tokenizer::warning(string warning, string debug_file, int debug_line, int offset)
+void tokenizer::warning(string warning, string debug_file, int debug_line, int token_offset, int character_offset)
 {
-	int number = line_number(offset);
-	int column_start = line_offset(offset);
-	string line = this->line(offset);
-	string file = this->file(offset);
-
-	string str;
-	int column_end = 1;
-	for (int j = 0; j < (int)line.size() && j < column_start; j++)
-	{
-		if (line[j] != '\t')
-		{
-			str.push_back(' ');
-			column_end++;
-		}
-		else
-		{
-			str.push_back('\t');
-			column_end+=8;
-		}
-	}
-
-	string location = file + ":" + ::to_string(number+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
-	::warning(location, warning, debug_file, debug_line);
+	string line, space;
+	::warning(relative_location(token_offset, character_offset, &line, &space), warning, debug_file, debug_line);
 	cout << line << endl;
-	cout << str << "^" << endl;
+	cout << space << "^" << endl;
 }
 
-void tokenizer::note(string note, string debug_file, int debug_line, int offset)
+void tokenizer::note(string note, string debug_file, int debug_line, int token_offset, int character_offset)
 {
-	int number = line_number(offset);
-	int column_start = line_offset(offset);
-	string line = this->line(offset);
-	string file = this->file(offset);
-
-	string str;
-	int column_end = 1;
-	for (int j = 0; j < (int)line.size() && j < column_start; j++)
-	{
-		if (line[j] != '\t')
-		{
-			str.push_back(' ');
-			column_end++;
-		}
-		else
-		{
-			str.push_back('\t');
-			column_end+=8;
-		}
-	}
-
-	string location = file + ":" + ::to_string(number+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
-	::note(location, note, debug_file, debug_line);
+	string line, space;
+	::note(relative_location(token_offset, character_offset, &line, &space), note, debug_file, debug_line);
 	cout << line << endl;
-	cout << str << "^" << endl;
+	cout << space << "^" << endl;
 }
 
-void tokenizer::log(string log, string debug_file, int debug_line, int offset)
+void tokenizer::log(string log, string debug_file, int debug_line, int token_offset, int character_offset)
 {
-	int number = line_number(offset);
-	int column_start = line_offset(offset);
-	string line = this->line(offset);
-	string file = this->file(offset);
+	::log(relative_location(token_offset, character_offset), log, debug_file, debug_line);
+}
 
-	string str;
-	int column_end = 1;
-	for (int j = 0; j < (int)line.size() && j < column_start; j++)
-	{
-		if (line[j] != '\t')
-		{
-			str.push_back(' ');
-			column_end++;
-		}
-		else
-		{
-			str.push_back('\t');
-			column_end+=8;
-		}
-	}
+void tokenizer::token_internal(string internal, string debug_file, int debug_line, int character_offset)
+{
+	string line, space;
+	::internal(absolute_location(segment_index, offset+character_offset, &line, &space), internal, debug_file, debug_line);
+	cout << line << endl;
+	cout << space << "^" << endl;
+}
 
-	string location = file + ":" + ::to_string(number+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
-	::log(location, log, debug_file, debug_line);
+void tokenizer::token_error(string error, string debug_file, int debug_line, int character_offset)
+{
+	string line, space;
+	::error(absolute_location(segment_index, offset+character_offset, &line, &space), error, debug_file, debug_line);
+	cout << line << endl;
+	cout << space << "^" << endl;
+}
+
+void tokenizer::token_warning(string warning, string debug_file, int debug_line, int character_offset)
+{
+	string line, space;
+	::warning(absolute_location(segment_index, offset+character_offset, &line, &space), warning, debug_file, debug_line);
+	cout << line << endl;
+	cout << space << "^" << endl;
+}
+
+void tokenizer::token_note(string note, string debug_file, int debug_line, int character_offset)
+{
+	string line, space;
+	::note(absolute_location(segment_index, offset+character_offset, &line, &space), note, debug_file, debug_line);
+	cout << line << endl;
+	cout << space << "^" << endl;
+}
+
+void tokenizer::token_log(string log, string debug_file, int debug_line, int character_offset)
+{
+	::log(absolute_location(segment_index, offset+character_offset), log, debug_file, debug_line);
 }
 
 void tokenizer::syntax_start(parse::syntax *syntax)
@@ -244,6 +174,21 @@ bool tokenizer::erase(string key)
 		return false;
 }
 
+void tokenizer::push()
+{
+	stack.push_back(pair<int, vector<int> >(segment_index, index));
+}
+
+void tokenizer::pop()
+{
+	if (stack.size() > 0)
+	{
+		segment_index = stack.back().first;
+		index = stack.back().second;
+		stack.pop_back();
+	}
+}
+
 tokenizer::level tokenizer::increment(bool required)
 {
 	expected_hierarchy.push_back(pair<vector<string>, bool>(vector<string>(), required));
@@ -289,7 +234,17 @@ bool tokenizer::decrement(string debug_file, int debug_line, void *data)
 
 		error(error_string, debug_file, debug_line, 1);
 
-		while ((idx = expected(1, data)).first < max_required_level && next() != "");
+		int old_segment = segment_index;
+		vector<int> old_index = index;
+
+		string next_token;
+		while ((idx = expected(1, data)).first < max_required_level && (next_token = next()) != "");
+
+		if (next_token == "")
+		{
+			segment_index = old_segment;
+			index = old_index;
+		}
 	}
 
 	if (idx.first < (int)expected_hierarchy.size() - 1)
@@ -401,11 +356,11 @@ void tokenizer::insert(string name, string contents, void *data)
 	segments.insert(segments.begin() + segment_index, segment());
 	index.insert(index.begin() + segment_index, -1);
 
-	// Parse the input to provide information about line numbers and tokens.
 	segments[segment_index].name = name;
 	segments[segment_index].buffer = contents;
 	segments[segment_index].lines.push_back(0);
 
+	// Parse the input to provide information about line numbers.
 	offset = -1;
 	while (offset < (int)segments[segment_index].buffer.size()-1)
 	{
@@ -417,7 +372,16 @@ void tokenizer::insert(string name, string contents, void *data)
 			segments[segment_index].lines.push_back(offset+2);
 			next_char();
 		}
-		else if (character == '\t' || character == ' ')
+		else
+			next_char();
+	}
+
+	// Parse the input to provide information about tokens.
+	offset = -1;
+	while (offset < (int)segments[segment_index].buffer.size()-1)
+	{
+		char character = peek_char(1);
+		if (character == '\n' || character == '\t' || character == ' ')
 			next_char();
 		else
 		{
@@ -432,14 +396,24 @@ void tokenizer::insert(string name, string contents, void *data)
 					matching_tokens.push_back(i);
 
 			if (matching_comments.size() + matching_tokens.size() > 1)
-				::internal(location(segment_index, offset+1), "ambiguous token set", __FILE__, __LINE__);
+			{
+				string token_set = "";
+				for (int i = 0; i < (int)matching_tokens.size(); i++)
+				{
+					if (i != 0)
+						token_set += " ";
+					token_set += matching_tokens[i]->first;
+				}
+
+				token_internal("ambiguous token set " + token_set, __FILE__, __LINE__);
+			}
 
 			if (matching_comments.size() > 0)
 				comment_registry[matching_comments.back()].second(*this, data);
 			else if (matching_tokens.size() > 0)
 				segments[segment_index].tokens.push_back(matching_tokens.back()->second.consume(*this, data));
 			else
-				::error(location(segment_index, offset+1), (string)"stray '" + character + "'", __FILE__, __LINE__);
+				token_error((string)"stray '" + next_char() + "'", __FILE__, __LINE__);
 		}
 	}
 }
@@ -449,100 +423,187 @@ bool tokenizer::is_next(string str, int i)
 	return (peek(i) == str);
 }
 
-string tokenizer::file(int i)
+void tokenizer::normalize_token(int &segment_index, int &token_index)
 {
-	int temp_index = segment_index;
-	int inc = (i >= 0 ? 1 : -1);
-	while (temp_index < (int)segments.size() && temp_index >= 0 && (index[temp_index] + i >= (int)segments[temp_index].tokens.size() || index[temp_index]+i < 0))
+	while (segment_index >= 0 && segment_index < (int)segments.size() && (token_index >= (int)segments[segment_index].tokens.size() || token_index < 0))
 	{
-		i -= inc ? segments[temp_index].tokens.size() - index[temp_index] : -index[temp_index];
-		temp_index += inc;
-	}
-
-	if (temp_index >= 0 && temp_index < (int)segments.size())
-		return segments[temp_index].name;
-	else
-		return "";
-}
-
-string tokenizer::line(int i)
-{
-	int temp_index = segment_index;
-	int inc = (i >= 0 ? 1 : -1);
-	while (temp_index < (int)segments.size() && temp_index >= 0 && (index[temp_index] + i >= (int)segments[temp_index].tokens.size() || index[temp_index]+i < 0))
-	{
-		i -= inc ? segments[temp_index].tokens.size() - index[temp_index] : -index[temp_index];
-		temp_index += inc;
-	}
-
-	if (temp_index >= 0 && temp_index < (int)segments.size())
-		return segments[temp_index].get_line(segments[temp_index].token_to_line(index[temp_index]+i));
-	else
-		return "";
-}
-
-string tokenizer::location(int s, int o)
-{
-	string location = segments[s].name + ":" + ::to_string(segments[s].lines.size()) + ":";
-	int l = 0, h = 0;
-	for (int i = segments[s].lines.back(); i < o; i++)
-	{
-		l++;
-		if (segments[s].buffer[i] == '\t')
-			h += 8;
+		if (token_index < 0)
+		{
+			segment_index--;
+			if (segment_index >= 0)
+				token_index += (int)segments[segment_index].tokens.size();
+		}
 		else
-			h++;
+		{
+			token_index -= (int)segments[segment_index].tokens.size();
+			segment_index++;
+		}
 	}
-	location += ::to_string(l) + "-" + ::to_string(h);
-	return location;
 }
 
-int tokenizer::line_number(int i)
+void tokenizer::normalize_character(int &segment_index, int &character_index)
 {
-	int temp_index = segment_index;
-	int inc = (i >= 0 ? 1 : -1);
-	while (temp_index < (int)segments.size() && temp_index >= 0 && (index[temp_index] + i >= (int)segments[temp_index].tokens.size() || index[temp_index]+i < 0))
+	while (segment_index >= 0 && segment_index < (int)segments.size() && (character_index >= (int)segments[segment_index].buffer.size() || character_index < 0))
 	{
-		i -= inc ? segments[temp_index].tokens.size() - index[temp_index] : -index[temp_index];
-		temp_index += inc;
+		if (character_index < 0)
+		{
+			segment_index--;
+			if (segment_index >= 0)
+				character_index += (int)segments[segment_index].buffer.size();
+		}
+		else
+		{
+			character_index -= (int)segments[segment_index].buffer.size();
+			segment_index++;
+		}
+	}
+}
+
+void tokenizer::normalize(int &segment_index, int &token_index, int &character_offset)
+{
+	normalize_token(segment_index, token_index);
+	if (segment_index >= 0 && segment_index < (int)segments.size())
+	{
+		int character_index = character_offset + segments[segment_index].tokens[token_index].start;
+		normalize_character(segment_index, character_index);
+		if (segment_index >= 0 && segment_index < (int)segments.size())
+		{
+			token_index = segments[segment_index].char_to_token(character_index);
+			character_offset = character_index - segments[segment_index].tokens[token_index].start;
+		}
+	}
+}
+
+string tokenizer::file(int segment_offset, int token_offset, int character_offset)
+{
+	segment_offset += segment_index;
+	if (segment_offset >= 0 && segment_offset < (int)segments.size())
+	{
+		token_offset += index[segment_offset];
+		normalize(segment_offset, token_offset, character_offset);
 	}
 
-	if (temp_index >= 0 && temp_index < (int)segments.size())
-		return segments[temp_index].token_to_line(index[temp_index]+i);
+	if (segment_offset >= 0 && segment_offset < (int)segments.size())
+		return segments[segment_offset].name;
+	else
+		return "";
+}
+
+string tokenizer::line(int segment_offset, int token_offset, int character_offset)
+{
+	segment_offset += segment_index;
+	if (segment_offset >= 0 && segment_offset < (int)segments.size())
+	{
+		token_offset += index[segment_offset];
+		normalize(segment_offset, token_offset, character_offset);
+	}
+
+	if (segment_offset >= 0 && segment_offset < (int)segments.size())
+		return segments[segment_offset].get_line(segments[segment_offset].char_to_line(segments[segment_offset].tokens[token_offset].start + character_offset));
+	else
+		return "";
+}
+
+string tokenizer::absolute_location(int segment_index, int character_index, string *line, string *space)
+{
+	normalize_character(segment_index, character_index);
+
+	if (segment_index >= 0 && segment_index < (int)segments.size())
+	{
+		if (character_index >= 0 && character_index < (int)segments[segment_index].buffer.size())
+		{
+			int line_index = segments[segment_index].char_to_line(character_index);
+			int column_start = character_index - segments[segment_index].lines[line_index];
+			string line_str;
+			line_str = segments[segment_index].get_line(line_index);
+			string file = segments[segment_index].name;
+
+			int column_end = get_column_end(line_str, column_start, space);
+			if (line != NULL)
+				*line = line_str;
+
+			return file + ":" + ::to_string(line_index+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
+		}
+		else
+			return "undefined";
+	}
+	else
+		return "undefined";
+}
+
+string tokenizer::relative_location(int token_offset, int character_offset, string *line, string *space)
+{
+	int segment_offset = segment_index;
+	if (segment_index >= 0 && segment_index < (int)segments.size())
+	{
+		token_offset += index[segment_offset];
+		normalize(segment_offset, token_offset, character_offset);
+	}
+
+	if (segment_index >= 0 && segment_index < (int)segments.size())
+	{
+		if (token_offset >= 0 && token_offset < (int)segments[segment_offset].tokens.size())
+		{
+			int line_index = segments[segment_offset].char_to_line(segments[segment_offset].tokens[token_offset].start + character_offset);
+			int column_start = segments[segment_offset].tokens[token_offset].start + character_offset - segments[segment_offset].lines[line_index];
+			string line_str = segments[segment_offset].get_line(line_index);
+			string file = segments[segment_offset].name;
+
+			int column_end = get_column_end(line_str, column_start, space);
+			if (line != NULL)
+				*line = line_str;
+
+			return file + ":" + ::to_string(line_index+1) + ":" + ::to_string(column_start) + "-" + ::to_string(column_end);
+		}
+		else
+			return "undefined";
+	}
+	else
+		return "undefined";
+}
+
+int tokenizer::line_number(int segment_offset, int token_offset, int character_offset)
+{
+	segment_offset += segment_index;
+	if (segment_offset >= 0 && segment_offset < (int)segments.size())
+	{
+		token_offset += index[segment_offset];
+		normalize(segment_offset, token_offset, character_offset);
+	}
+
+	if (segment_offset >= 0 && segment_offset < (int)segments.size())
+		return segments[segment_offset].char_to_line(segments[segment_offset].tokens[token_offset].start + character_offset);
 	else
 		return -1;
 }
 
-int tokenizer::line_offset(int i)
+int tokenizer::line_offset(int segment_offset, int token_offset, int character_offset)
 {
-	int temp_index = segment_index;
-	int inc = (i >= 0 ? 1 : -1);
-	while (temp_index < (int)segments.size() && temp_index >= 0 && (index[temp_index] + i >= (int)segments[temp_index].tokens.size() || index[temp_index]+i < 0))
+	segment_offset += segment_index;
+	if (segment_offset >= 0 && segment_offset < (int)segments.size())
 	{
-		i -= inc ? segments[temp_index].tokens.size() - index[temp_index] : -index[temp_index];
-		temp_index += inc;
+		token_offset += index[segment_offset];
+		normalize(segment_offset, token_offset, character_offset);
 	}
 
-	if (temp_index >= 0 && temp_index < (int)segments.size())
-		return segments[temp_index].tokens[index[temp_index]+i].start - segments[temp_index].lines[segments[temp_index].token_to_line(index[temp_index]+i)];
+	if (segment_offset >= 0 && segment_offset < (int)segments.size())
+	{
+		int line_index = segments[segment_offset].char_to_line(segments[segment_offset].tokens[token_offset].start + character_offset);
+		return segments[segment_offset].tokens[token_offset].start + character_offset - segments[segment_offset].lines[line_index];
+	}
 	else
 		return -1;
 }
 
-int tokenizer::segment_offset(int i)
+int tokenizer::character_offset(int segment_offset, int token_offset, int character_offset)
 {
-	int temp_index = segment_index;
-	int inc = (i >= 0 ? 1 : -1);
-	while (temp_index < (int)segments.size() && temp_index >= 0 && (index[temp_index] + i >= (int)segments[temp_index].tokens.size() || index[temp_index]+i < 0))
+	segment_offset += segment_index;
+	if (segment_offset >= 0 && segment_offset < (int)segments.size())
 	{
-		i -= inc ? segments[temp_index].tokens.size() - index[temp_index] : -index[temp_index];
-		temp_index += inc;
+		token_offset += index[segment_offset];
+		normalize(segment_offset, token_offset, character_offset);
 	}
-
-	if (temp_index >= 0 && temp_index < (int)segments.size())
-		return segments[temp_index].tokens[index[temp_index]+i].start;
-	else
-		return -1;
+	return character_offset;
 }
 
 char tokenizer::curr_char()

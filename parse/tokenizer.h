@@ -54,17 +54,25 @@ struct tokenizer
 	int offset;
 	int segment_index;
 
+	vector<pair<int, vector<int> > > stack;
+
 	vector<pair<vector<string>, bool> > expected_hierarchy;
 	typedef typename vector<pair<vector<string>, bool> >::iterator level;
 	string found_type;
 
 	map<string, pair<string, int> > bookmarks;
 
-	void internal(string internal, string debug_file, int debug_line, int offset = 0);
-	void error(string error, string debug_file, int debug_line, int offset = 0);
-	void warning(string warning, string debug_file, int debug_line, int offset = 0);
-	void note(string note, string debug_file, int debug_line, int offset = 0);
-	void log(string log, string debug_file, int debug_line, int offset = 0);
+	void internal(string internal, string debug_file, int debug_line, int token_offset = 0, int character_offset = 0);
+	void error(string error, string debug_file, int debug_line, int token_offset = 0, int character_offset = 0);
+	void warning(string warning, string debug_file, int debug_line, int token_offset = 0, int character_offset = 0);
+	void note(string note, string debug_file, int debug_line, int token_offset = 0, int character_offset = 0);
+	void log(string log, string debug_file, int debug_line, int token_offset = 0, int character_offset = 0);
+
+	void token_internal(string internal, string debug_file, int debug_line, int character_offset = 0);
+	void token_error(string error, string debug_file, int debug_line, int character_offset = 0);
+	void token_warning(string warning, string debug_file, int debug_line, int character_offset = 0);
+	void token_note(string note, string debug_file, int debug_line, int character_offset = 0);
+	void token_log(string log, string debug_file, int debug_line, int character_offset = 0);
 
 	void syntax_start(parse::syntax *syntax);
 	void syntax_end(parse::syntax *syntax);
@@ -73,6 +81,9 @@ struct tokenizer
 	bool load(const parse::syntax *syntax);
 	bool load(string key);
 	bool erase(string key);
+
+	void push();
+	void pop();
 
 	template <class type>
 	void register_syntax()
@@ -170,12 +181,16 @@ struct tokenizer
 		return (peek_type(i) == "[" + type().debug_name + "]");
 	}
 
-	string file(int i = 0);
-	string line(int i = 0);
-	string location(int s, int o);
-	int line_number(int i = 0);
-	int line_offset(int i = 0);
-	int segment_offset(int i = 0);
+	void normalize_token(int &segment_index, int &token_index);
+	void normalize_character(int &segment_index, int &character_index);
+	void normalize(int &segment_index, int &token_index, int &character_offset);
+	string file(int segment_offset = 0, int token_offset = 0, int character_offset = 0);
+	string line(int segment_offset = 0, int token_offset = 0, int character_offset = 0);
+	string absolute_location(int segment_index, int character_index, string *line = NULL, string *space = NULL);
+	string relative_location(int token_offset, int character_offset, string *line = NULL, string *space = NULL);
+	int line_number(int segment_offset = 0, int token_offset = 0, int character_offset = 0);
+	int line_offset(int segment_offset = 0, int token_offset = 0, int character_offset = 0);
+	int character_offset(int segment_offset = 0, int token_offset = 0, int character_offset = 0);
 
 	char curr_char();
 	char prev_char();
