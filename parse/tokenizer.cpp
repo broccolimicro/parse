@@ -22,32 +22,28 @@ void tokenizer::internal(string internal, string debug_file, int debug_line, int
 {
 	string line, space;
 	::internal(relative_location(token_offset, character_offset, &line, &space), internal, debug_file, debug_line);
-	cout << line << endl;
-	cout << space << "^" << endl;
+	printf("%s\n%s^\n", line.c_str(), space.c_str());
 }
 
 void tokenizer::error(string error, string debug_file, int debug_line, int token_offset, int character_offset)
 {
 	string line, space;
 	::error(relative_location(token_offset, character_offset, &line, &space), error, debug_file, debug_line);
-	cout << line << endl;
-	cout << space << "^" << endl;
+	printf("%s\n%s^\n", line.c_str(), space.c_str());
 }
 
 void tokenizer::warning(string warning, string debug_file, int debug_line, int token_offset, int character_offset)
 {
 	string line, space;
 	::warning(relative_location(token_offset, character_offset, &line, &space), warning, debug_file, debug_line);
-	cout << line << endl;
-	cout << space << "^" << endl;
+	printf("%s\n%s^\n", line.c_str(), space.c_str());
 }
 
 void tokenizer::note(string note, string debug_file, int debug_line, int token_offset, int character_offset)
 {
 	string line, space;
 	::note(relative_location(token_offset, character_offset, &line, &space), note, debug_file, debug_line);
-	cout << line << endl;
-	cout << space << "^" << endl;
+	printf("%s\n%s^\n", line.c_str(), space.c_str());
 }
 
 void tokenizer::log(string log, string debug_file, int debug_line, int token_offset, int character_offset)
@@ -59,32 +55,28 @@ void tokenizer::token_internal(string internal, string debug_file, int debug_lin
 {
 	string line, space;
 	::internal(absolute_location(segment_index, offset+character_offset, &line, &space), internal, debug_file, debug_line);
-	cout << line << endl;
-	cout << space << "^" << endl;
+	printf("%s\n%s^\n", line.c_str(), space.c_str());
 }
 
 void tokenizer::token_error(string error, string debug_file, int debug_line, int character_offset)
 {
 	string line, space;
 	::error(absolute_location(segment_index, offset+character_offset, &line, &space), error, debug_file, debug_line);
-	cout << line << endl;
-	cout << space << "^" << endl;
+	printf("%s\n%s^\n", line.c_str(), space.c_str());
 }
 
 void tokenizer::token_warning(string warning, string debug_file, int debug_line, int character_offset)
 {
 	string line, space;
 	::warning(absolute_location(segment_index, offset+character_offset, &line, &space), warning, debug_file, debug_line);
-	cout << line << endl;
-	cout << space << "^" << endl;
+	printf("%s\n%s^\n", line.c_str(), space.c_str());
 }
 
 void tokenizer::token_note(string note, string debug_file, int debug_line, int character_offset)
 {
 	string line, space;
 	::note(absolute_location(segment_index, offset+character_offset, &line, &space), note, debug_file, debug_line);
-	cout << line << endl;
-	cout << space << "^" << endl;
+	printf("%s\n%s^\n", line.c_str(), space.c_str());
 }
 
 void tokenizer::token_log(string log, string debug_file, int debug_line, int character_offset)
