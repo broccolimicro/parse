@@ -45,9 +45,9 @@ struct tokenizer
 	~tokenizer();
 
 	map<string, is_next_ptr> syntax_registry;
-	typedef typename map<string, is_next_ptr>::iterator syntax_registry_iterator;
+	typedef map<string, is_next_ptr>::iterator syntax_registry_iterator;
 	map<string, token_entry> token_registry;
-	typedef typename map<string, token_entry>::iterator token_registry_iterator;
+	typedef map<string, token_entry>::iterator token_registry_iterator;
 	vector<pair<is_next_ptr, consume_ptr> > comment_registry;
 	vector<segment> segments;
 	vector<int> index;
@@ -57,7 +57,7 @@ struct tokenizer
 	vector<pair<int, vector<int> > > stack;
 
 	vector<pair<vector<string>, bool> > expected_hierarchy;
-	typedef typename vector<pair<vector<string>, bool> >::iterator level;
+	typedef vector<pair<vector<string>, bool> >::iterator level;
 	string found_type;
 
 	map<string, pair<string, int> > bookmarks;
