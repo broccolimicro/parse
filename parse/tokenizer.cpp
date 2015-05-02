@@ -11,6 +11,24 @@ tokenizer::tokenizer()
 {
 	segment_index = -1;
 	offset = -1;
+	num_errors = 0;
+	num_warnings = 0;
+	num_internal = 0;
+	num_notes = 0;
+	num_log = 0;
+	export_messages = true;
+}
+
+tokenizer::tokenizer(bool export_messages)
+{
+	segment_index = -1;
+	offset = -1;
+	num_errors = 0;
+	num_warnings = 0;
+	num_internal = 0;
+	num_notes = 0;
+	num_log = 0;
+	this->export_messages = export_messages;
 }
 
 tokenizer::~tokenizer()
@@ -21,67 +39,142 @@ tokenizer::~tokenizer()
 void tokenizer::internal(string internal, string debug_file, int debug_line, int token_offset, int character_offset)
 {
 	string line, space;
-	::internal(relative_location(token_offset, character_offset, &line, &space), internal, debug_file, debug_line);
+	string location = relative_location(token_offset, character_offset, &line, &space);
+	printf("%s:%d:%s: internal failure: %s\n", debug_file.c_str(), debug_line, location.c_str(), internal.c_str());
 	printf("%s\n%s^\n", line.c_str(), space.c_str());
+	if (export_messages)
+		::flag_internal(1);
+	num_internal++;
 }
 
 void tokenizer::error(string error, string debug_file, int debug_line, int token_offset, int character_offset)
 {
 	string line, space;
-	::error(relative_location(token_offset, character_offset, &line, &space), error, debug_file, debug_line);
+	string location = relative_location(token_offset, character_offset, &line, &space);
+	if (::get_debug())
+		printf("%s:%d:%s: error: %s\n", debug_file.c_str(), debug_line, location.c_str(), error.c_str());
+	else
+		printf("%s: error: %s\n", location.c_str(), error.c_str());
 	printf("%s\n%s^\n", line.c_str(), space.c_str());
+	if (export_messages)
+		::flag_errors(1);
+	num_errors++;
 }
 
 void tokenizer::warning(string warning, string debug_file, int debug_line, int token_offset, int character_offset)
 {
 	string line, space;
-	::warning(relative_location(token_offset, character_offset, &line, &space), warning, debug_file, debug_line);
+	string location = relative_location(token_offset, character_offset, &line, &space);
+	if (::get_debug())
+		printf("%s:%d:%s: warning: %s\n", debug_file.c_str(), debug_line, location.c_str(), warning.c_str());
+	else
+		printf("%s: warning: %s\n", location.c_str(), warning.c_str());
 	printf("%s\n%s^\n", line.c_str(), space.c_str());
+	if (export_messages)
+		::flag_warnings(1);
+	num_warnings++;
 }
 
 void tokenizer::note(string note, string debug_file, int debug_line, int token_offset, int character_offset)
 {
 	string line, space;
-	::note(relative_location(token_offset, character_offset, &line, &space), note, debug_file, debug_line);
+	string location = relative_location(token_offset, character_offset, &line, &space);
+	if (::get_debug())
+		printf("%s:%d:%s: note: %s\n", debug_file.c_str(), debug_line, location.c_str(), note.c_str());
+	else
+		printf("%s: note: %s\n", location.c_str(), note.c_str());
 	printf("%s\n%s^\n", line.c_str(), space.c_str());
+	if (export_messages)
+		::flag_notes(1);
+	num_notes++;
 }
 
 void tokenizer::log(string log, string debug_file, int debug_line, int token_offset, int character_offset)
 {
-	::log(relative_location(token_offset, character_offset), log, debug_file, debug_line);
+	if (::get_verbose())
+	{
+		string location = relative_location(token_offset, character_offset);
+		if (::get_debug())
+			printf("%s:%d:%s: log: %s\n", debug_file.c_str(), debug_line, location.c_str(), log.c_str());
+		else
+			printf("%s: log: %s\n", location.c_str(), log.c_str());
+		num_log++;
+		if (export_messages)
+			::flag_log(1);
+	}
 }
 
 void tokenizer::token_internal(string internal, string debug_file, int debug_line, int character_offset)
 {
 	string line, space;
-	::internal(absolute_location(segment_index, offset+character_offset, &line, &space), internal, debug_file, debug_line);
+	string location = absolute_location(segment_index, offset+character_offset, &line, &space);
+	printf("%s:%d:%s: internal failure: %s\n", debug_file.c_str(), debug_line, location.c_str(), internal.c_str());
 	printf("%s\n%s^\n", line.c_str(), space.c_str());
+	if (export_messages)
+		::flag_internal(1);
+	num_internal++;
 }
 
 void tokenizer::token_error(string error, string debug_file, int debug_line, int character_offset)
 {
 	string line, space;
-	::error(absolute_location(segment_index, offset+character_offset, &line, &space), error, debug_file, debug_line);
+	string location = absolute_location(segment_index, offset+character_offset, &line, &space);
+	if (::get_debug())
+		printf("%s:%d:%s: error: %s\n", debug_file.c_str(), debug_line, location.c_str(), error.c_str());
+	else
+		printf("%s: error: %s\n", location.c_str(), error.c_str());
 	printf("%s\n%s^\n", line.c_str(), space.c_str());
+	if (export_messages)
+		::flag_errors(1);
+	num_errors++;
 }
 
 void tokenizer::token_warning(string warning, string debug_file, int debug_line, int character_offset)
 {
 	string line, space;
-	::warning(absolute_location(segment_index, offset+character_offset, &line, &space), warning, debug_file, debug_line);
+	string location = absolute_location(segment_index, offset+character_offset, &line, &space);
+	if (::get_debug())
+		printf("%s:%d:%s: warning: %s\n", debug_file.c_str(), debug_line, location.c_str(), warning.c_str());
+	else
+		printf("%s: warning: %s\n", location.c_str(), warning.c_str());
 	printf("%s\n%s^\n", line.c_str(), space.c_str());
+	if (export_messages)
+		::flag_warnings(1);
+	num_warnings++;
 }
 
 void tokenizer::token_note(string note, string debug_file, int debug_line, int character_offset)
 {
 	string line, space;
-	::note(absolute_location(segment_index, offset+character_offset, &line, &space), note, debug_file, debug_line);
+	string location = absolute_location(segment_index, offset+character_offset, &line, &space);
+	if (::get_debug())
+		printf("%s:%d:%s: note: %s\n", debug_file.c_str(), debug_line, location.c_str(), note.c_str());
+	else
+		printf("%s: note: %s\n", location.c_str(), note.c_str());
 	printf("%s\n%s^\n", line.c_str(), space.c_str());
+	if (export_messages)
+		::flag_notes(1);
+	num_notes++;
 }
 
 void tokenizer::token_log(string log, string debug_file, int debug_line, int character_offset)
 {
-	::log(absolute_location(segment_index, offset+character_offset), log, debug_file, debug_line);
+	if (::get_verbose())
+	{
+		string location = absolute_location(segment_index, offset+character_offset);
+		if (::get_debug())
+			printf("%s:%d:%s: log: %s\n", debug_file.c_str(), debug_line, location.c_str(), log.c_str());
+		else
+			printf("%s: log: %s\n", location.c_str(), log.c_str());
+		if (export_messages)
+			::flag_log(1);
+		num_log++;
+	}
+}
+
+bool tokenizer::is_clean()
+{
+	return (num_internal == 0 && num_errors == 0);
 }
 
 void tokenizer::syntax_start(parse::syntax *syntax)
@@ -741,4 +834,20 @@ bool tokenizer::segment_loading(string name)
 			return true;
 
 	return false;
+}
+
+void tokenizer::reset()
+{
+	segments.clear();
+	index.clear();
+	segment_index = -1;
+	offset = -1;
+	stack.clear();
+	expected_hierarchy.clear();
+	bookmarks.clear();
+	num_errors = 0;
+	num_warnings = 0;
+	num_internal = 0;
+	num_notes = 0;
+	num_log = 0;
 }

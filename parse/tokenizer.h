@@ -42,6 +42,7 @@ struct token_entry
 struct tokenizer
 {
 	tokenizer();
+	tokenizer(bool export_messages);
 	~tokenizer();
 
 	map<string, is_next_ptr> syntax_registry;
@@ -62,6 +63,13 @@ struct tokenizer
 
 	map<string, pair<string, int> > bookmarks;
 
+	int num_errors;
+	int num_warnings;
+	int num_internal;
+	int num_notes;
+	int num_log;
+	bool export_messages;
+
 	void internal(string internal, string debug_file, int debug_line, int token_offset = 0, int character_offset = 0);
 	void error(string error, string debug_file, int debug_line, int token_offset = 0, int character_offset = 0);
 	void warning(string warning, string debug_file, int debug_line, int token_offset = 0, int character_offset = 0);
@@ -73,6 +81,7 @@ struct tokenizer
 	void token_warning(string warning, string debug_file, int debug_line, int character_offset = 0);
 	void token_note(string note, string debug_file, int debug_line, int character_offset = 0);
 	void token_log(string log, string debug_file, int debug_line, int character_offset = 0);
+	bool is_clean();
 
 	void syntax_start(parse::syntax *syntax);
 	void syntax_end(parse::syntax *syntax);
@@ -206,6 +215,8 @@ struct tokenizer
 
 	bool segment_loaded(string name);
 	bool segment_loading(string name);
+
+	void reset();
 };
 
 #endif
