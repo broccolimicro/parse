@@ -625,6 +625,13 @@ string tokenizer::relative_location(int token_offset, int character_offset, stri
 		normalize(segment_offset, token_offset, character_offset);
 	}
 
+	if (segment_offset >= (int)segments.size())
+	{
+		segment_offset = (int)segments.size()-1;
+		token_offset = (int)segments[segment_offset].tokens.size()-1;
+		character_offset = segments[segment_offset].tokens[token_offset].end;
+	}
+
 	if (segment_offset >= 0 && segment_offset < (int)segments.size())
 	{
 		if (token_offset >= 0 && token_offset < (int)segments[segment_offset].tokens.size())
