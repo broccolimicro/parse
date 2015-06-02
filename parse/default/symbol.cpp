@@ -52,14 +52,15 @@ token symbol::consume(tokenizer &tokens, void *data)
 bool symbol::is_next(tokenizer &tokens, int i, void *data)
 {
 	char character = tokens.peek_char(i);
+	char character2 = tokens.peek_char(i+1);
 
 	return (character == '~' || character == '!' || character == '@' || character == '#' ||
 			 character == '$' || character == '%' || character == '^' || character == '&' ||
-			 character == '*' || character == '(' || character == ')' || character == '-' ||
+			 (character == '*' && character2 != '/') || character == '(' || character == ')' || character == '-' ||
 			 character == '=' || character == '+' || character == '[' || character == '{' ||
 			 character == ']' || character == '}' || character == '\\' || character == '|' ||
 			 character == ';' || character == ':' || character == ',' || character == '<' ||
-			 character == '.' || character == '>' || character == '/' || character == '?');
+			 character == '.' || character == '>' || character == '?' || (character == '/' && character2 != '/' && character2 != '*'));
 }
 
 }
