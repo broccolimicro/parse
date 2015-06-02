@@ -45,6 +45,7 @@ void tokenizer::internal(string internal, string debug_file, int debug_line, int
 	if (export_messages)
 		::flag_internal(1);
 	num_internal++;
+	exit(0);
 }
 
 void tokenizer::error(string error, string debug_file, int debug_line, int token_offset, int character_offset)
@@ -332,12 +333,23 @@ bool tokenizer::decrement(string debug_file, int debug_line, void *data)
 		}
 	}
 
-	if (idx.first < (int)expected_hierarchy.size() - 1)
+	if (expected_hierarchy.size() == 0)
+	{
+		string temp = segments[segment_index].get_token(index[segment_index] + 1);
+		next();
+		internal("nothing expected, found '" + temp + "'", debug_file, debug_line);
+		prev();
+	}
+	else if (idx.first != (int)expected_hierarchy.size() - 1)
+	{
 		found_type = "";
+		expected_hierarchy.pop_back();
+	}
 	else
+	{
 		found_type = expected_hierarchy[idx.first].first[idx.second];
-
-	expected_hierarchy.pop_back();
+		expected_hierarchy.pop_back();
+	}
 
 	return (found_type != "");
 }
@@ -637,7 +649,10 @@ string tokenizer::relative_location(int token_offset, int character_offset, stri
 		if (token_offset >= 0 && token_offset < (int)segments[segment_offset].tokens.size())
 		{
 			int line_index = segments[segment_offset].char_to_line(segments[segment_offset].tokens[token_offset].start + character_offset);
-			int column_start = segments[segment_offset].tokens[token_offset].start + character_offset - segments[segment_offset].lines[line_index];
+			int column_start = 0;
+			if (line_index < (int)segments[segment_offset].lines.size())
+				column_start = segments[segment_offset].tokens[token_offset].start + character_offset - segments[segment_offset].lines[line_index];
+
 			string line_str = segments[segment_offset].get_line(line_index);
 			string file = segments[segment_offset].name;
 
