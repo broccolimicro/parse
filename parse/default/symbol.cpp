@@ -60,7 +60,8 @@ bool symbol::is_next(tokenizer &tokens, int i, void *data)
 			 character == '=' || character == '+' || character == '[' || character == '{' ||
 			 character == ']' || character == '}' || character == '\\' || character == '|' ||
 			 character == ';' || character == ':' || character == ',' || character == '<' ||
-			 character == '.' || character == '>' || character == '?' || (character == '/' && character2 != '/' && character2 != '*'));
+			 character == '.' || character == '>' || character == '?' || (character == '/' && character2 != '/' && character2 != '*') ||
+			 character == '\'');
 }
 
 }

@@ -55,7 +55,7 @@ token text::consume(tokenizer &tokens, void *data)
 
 bool text::is_next(tokenizer &tokens, int i, void *data)
 {
-	return (tokens.peek_char(i) == '\'' || tokens.peek_char(i) == '\"');
+	return tokens.peek_char(i) == '\"';
 }
 
 }

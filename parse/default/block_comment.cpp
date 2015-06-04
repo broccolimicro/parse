@@ -24,8 +24,8 @@ token block_comment::consume(tokenizer &tokens, void *data)
 	result.type = tokens.comment_type<block_comment>();
 	result.start = tokens.offset+1;
 
-	tokens.next();
-	tokens.next();
+	tokens.next_char();
+	tokens.next_char();
 
 	bool star = false;
 	bool done = false;
