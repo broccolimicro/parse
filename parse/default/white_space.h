@@ -1,5 +1,5 @@
 /*
- * line_comment.h
+ * white_space.h
  *
  *  Created on: Oct 16, 2014
  *      Author: nbingham
@@ -7,15 +7,15 @@
 
 #include "../parse.h"
 
-#ifndef parse_default_line_comment_h
-#define parse_default_line_comment_h
+#ifndef parse_default_white_space_h
+#define parse_default_white_space_h
 
 namespace parse
 {
-struct line_comment
+struct white_space
 {
-	line_comment();
-	~line_comment();
+	white_space();
+	~white_space();
 
 	string debug_name;
 

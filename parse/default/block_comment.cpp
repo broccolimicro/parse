@@ -11,6 +11,7 @@ namespace parse
 {
 block_comment::block_comment()
 {
+	debug_name = "block_comment";
 }
 
 block_comment::~block_comment()
@@ -21,7 +22,7 @@ block_comment::~block_comment()
 token block_comment::consume(tokenizer &tokens, void *data)
 {
 	token result;
-	result.type = tokens.comment_type<block_comment>();
+	result.type = tokens.token_type<block_comment>();
 	result.start = tokens.offset+1;
 
 	tokens.next_char();
@@ -49,7 +50,7 @@ token block_comment::consume(tokenizer &tokens, void *data)
 			star = false;
 	}
 
-	result.end = tokens.offset;
+	result.end = tokens.offset+1;
 	return result;
 }
 

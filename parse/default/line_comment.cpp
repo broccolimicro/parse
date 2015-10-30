@@ -11,6 +11,7 @@ namespace parse
 {
 line_comment::line_comment()
 {
+	debug_name = "line_comment";
 }
 
 line_comment::~line_comment()
@@ -21,7 +22,7 @@ line_comment::~line_comment()
 token line_comment::consume(tokenizer &tokens, void *data)
 {
 	token result;
-	result.type = tokens.comment_type<line_comment>();
+	result.type = tokens.token_type<line_comment>();
 	result.start = tokens.offset+1;
 
 	tokens.next_char();

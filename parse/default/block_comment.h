@@ -17,6 +17,8 @@ struct block_comment
 	block_comment();
 	~block_comment();
 
+	string debug_name;
+
 	static token consume(tokenizer &tokens, void *data = NULL);
 	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
 };

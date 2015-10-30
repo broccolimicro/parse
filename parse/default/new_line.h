@@ -1,5 +1,5 @@
 /*
- * line_comment.h
+ * new_line.h
  *
  *  Created on: Oct 16, 2014
  *      Author: nbingham
@@ -7,15 +7,15 @@
 
 #include "../parse.h"
 
-#ifndef parse_default_line_comment_h
-#define parse_default_line_comment_h
+#ifndef parse_default_new_line_h
+#define parse_default_new_line_h
 
 namespace parse
 {
-struct line_comment
+struct new_line
 {
-	line_comment();
-	~line_comment();
+	new_line();
+	~new_line();
 
 	string debug_name;
 

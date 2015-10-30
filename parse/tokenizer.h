@@ -21,11 +21,12 @@ typedef token (*consume_ptr)(tokenizer&, void *);
 
 struct token_entry
 {
-	token_entry(is_next_ptr n, consume_ptr c, int t)
+	token_entry(is_next_ptr next, consume_ptr consume, int type, bool keep)
 	{
-		is_next = n;
-		consume = c;
-		type = t;
+		this->is_next = next;
+		this->consume = consume;
+		this->type = type;
+		this->keep = keep;
 	}
 
 	~token_entry(){}
@@ -33,6 +34,7 @@ struct token_entry
 	is_next_ptr is_next;
 	consume_ptr consume;
 	int type;
+	bool keep;
 };
 
 /** This structure splits up multiple input files onto a stream of
@@ -49,7 +51,6 @@ struct tokenizer
 	typedef map<string, is_next_ptr>::iterator syntax_registry_iterator;
 	map<string, token_entry> token_registry;
 	typedef map<string, token_entry>::iterator token_registry_iterator;
-	vector<pair<is_next_ptr, consume_ptr> > comment_registry;
 	vector<segment> segments;
 	vector<int> index;
 	int offset;
@@ -107,29 +108,11 @@ struct tokenizer
 	}
 
 	template <class type>
-	void register_comment()
-	{
-		comment_registry.push_back(pair<is_next_ptr, consume_ptr>(&type::is_next, &type::consume));
-	}
-
-	template <class type>
-	bool comment_registered()
-	{
-		return (find(comment_registry.begin(), comment_registry.end(), pair<is_next_ptr, consume_ptr>(&type::is_next, &type::consume)) != comment_registry.end());
-	}
-
-	template <class type>
-	int comment_type()
-	{
-		return (find(comment_registry.begin(), comment_registry.end(), pair<is_next_ptr, consume_ptr>(&type::is_next, &type::consume)) - comment_registry.begin());
-	}
-
-	template <class type>
-	void register_token()
+	void register_token(bool keep = true)
 	{
 		string name = "[" + type().debug_name + "]";
 		if (token_registry.find(name) == token_registry.end())
-			token_registry.insert(pair<string, token_entry>(name, token_entry(&type::is_next, &type::consume, (int)token_registry.size())));
+			token_registry.insert(pair<string, token_entry>(name, token_entry(&type::is_next, &type::consume, (int)token_registry.size(), keep)));
 	}
 
 	template <class type>

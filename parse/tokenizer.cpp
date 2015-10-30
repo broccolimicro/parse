@@ -411,9 +411,9 @@ pair<int, int> tokenizer::expected(int i, void *data)
 
 	if (results.size() > 1)
 	{
-		internal("ambiguous grammar", __FILE__, __LINE__, 1);
 		for (int i = 0; i < (int)results.size(); i++)
 			::note("", ::to_string(results[i].first) + " " + ::to_string(results[i].second) + " " + ::to_string(expected_hierarchy[results[i].first].second) + " " + expected_hierarchy[results[i].first].first[results[i].second], __FILE__, __LINE__);
+		internal("ambiguous grammar", __FILE__, __LINE__, 1);
 		return pair<int, int>(-1, -1);
 	}
 	else if (results.size() == 1)
@@ -477,41 +477,32 @@ void tokenizer::insert(string name, string contents, void *data)
 	offset = -1;
 	while (offset < (int)segments[segment_index].buffer.size()-1)
 	{
-		char character = peek_char(1);
-		if (character == '\n' || character == '\t' || character == ' ')
-			next_char();
-		else
+		vector<token_registry_iterator> matching_tokens;
+		for (token_registry_iterator i = token_registry.begin(); i != token_registry.end(); i++)
+			if (i->second.is_next(*this, 1, data))
+				matching_tokens.push_back(i);
+
+		if (matching_tokens.size() > 1)
 		{
-			vector<int> matching_comments;
-			vector<token_registry_iterator> matching_tokens;
-			for (int i = 0; i < (int)comment_registry.size(); i++)
-				if (comment_registry[i].first(*this, 1, data))
-					matching_comments.push_back(i);
-
-			for (token_registry_iterator i = token_registry.begin(); i != token_registry.end(); i++)
-				if (i->second.is_next(*this, 1, data))
-					matching_tokens.push_back(i);
-
-			if (matching_comments.size() + matching_tokens.size() > 1)
+			string token_set = "";
+			for (int i = 0; i < (int)matching_tokens.size(); i++)
 			{
-				string token_set = "";
-				for (int i = 0; i < (int)matching_tokens.size(); i++)
-				{
-					if (i != 0)
-						token_set += " ";
-					token_set += matching_tokens[i]->first;
-				}
-
-				token_internal("ambiguous token set " + token_set, __FILE__, __LINE__);
+				if (i != 0)
+					token_set += " ";
+				token_set += matching_tokens[i]->first;
 			}
 
-			if (matching_comments.size() > 0)
-				comment_registry[matching_comments.back()].second(*this, data);
-			else if (matching_tokens.size() > 0)
-				segments[segment_index].tokens.push_back(matching_tokens.back()->second.consume(*this, data));
-			else
-				token_error((string)"stray '" + next_char() + "'", __FILE__, __LINE__);
+			token_internal("ambiguous token set " + token_set, __FILE__, __LINE__);
 		}
+
+		if (matching_tokens.size() > 0)
+		{
+			token result = matching_tokens.back()->second.consume(*this, data);
+			if (matching_tokens.back()->second.keep)
+				segments[segment_index].tokens.push_back(result);
+		}
+		else
+			token_error((string)"stray '" + next_char() + "'", __FILE__, __LINE__);
 	}
 }
 
