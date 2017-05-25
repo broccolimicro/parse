@@ -5,34 +5,71 @@
  *      Author: nbingham
  */
 
-#include <common/standard.h>
-#include "token.h"
+#include <std/string.h>
 
-#ifndef parse_segment_h
-#define parse_segment_h
+#pragma once
+
+using namespace core;
 
 struct segment
 {
+	struct iterator
+	{
+		segment *root;
+		array<string>::iterator line;
+		string::iterator c;
+
+		iterator();
+		iterator(segment *root, array<string>::iterator line, string::iterator c);
+		~iterator();
+
+		operator bool() const;
+
+		char &operator*() const;
+		char *ptr() const;
+		char &get() const;
+		
+		iterator &operator++(int);
+		iterator &operator--(int);
+		iterator &operator++();
+		iterator &operator--();
+		iterator &operator+=(int n);
+		iterator &operator-=(int n);
+		iterator operator+(int n) const;
+		iterator operator-(int n) const;
+		bool operator==(iterator i) const;
+		bool operator!=(iterator i) const;
+		bool operator<(iterator i) const;
+		bool operator>(iterator i) const;
+		bool operator<=(iterator i) const;
+		bool operator>=(iterator i) const;
+		int operator-(iterator i) const;
+		
+		string file_name();
+		int line_number();
+		int char_number();
+		pair<int, int> col_number();
+
+		string report();
+		string pointer(int length = 1);
+
+		void note(string msg, int length = 1);
+		void warn(string msg, int length = 1);
+		void error(string msg, int length = 1);
+	};
+
 	segment();
 	~segment();
 
 	string name;
-	string buffer;
-	vector<int> lines;
-	vector<token> tokens;
+	array<string> lines;
 
-	int char_to_line(int character_index);
-	int char_to_token(int character_index);
-	int token_to_line(int token_index);
-	int token_to_char(int token_index);
-	int line_to_token(int line_number);
-	int line_to_char(int line_number);
+	iterator begin();
+	iterator end();
+	iterator rbegin();
+	iterator rend();
 
-	segment subseg(int character_index, int character_length);
-	string substr(int character_index, int character_length);
-
-	string get_token(int token_index);
-	string get_line(int line_index);
+	void load(string name);
 };
 
-#endif
+

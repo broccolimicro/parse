@@ -1,0 +1,47 @@
+line_comment = m|//[^\n\r]*|
+block_comment = m|/\*.*\*/|
+whitespace = m|[ \t\r\n]+|
+
+assignment = name operator:0 expr:0 | name operator:1
+
+expr:0 = expr:1 (operator:2 expr:1)*
+expr:1 = expr:2 (operator:3 expr:2)*
+expr:2 = operator:4? expr:3
+expr:3 = expr:4 ((operator:5) expr:4)*
+expr:4 = expr:5 (('+'|'-') expr:5)*
+expr:5 = expr:6 (('*'|'/'|'%') expr:6)*
+expr:6 = '-'? expr:7
+expr:7 = expr:8 ('|' expr:8)*
+expr:8 = expr:9 (('&'|'^') expr:9)*
+expr:9 = expr:10 (('<<'|'>>') expr:10)*
+expr:10 = '~'? expr:11
+expr:11 = name | value | expr:12
+expr:12 = '(' expr:0 ')'
+
+name = m/[a-zA-Z_][a-zA-Z0-9_]*/
+
+b_op = operator:2 | operator:3 | operator:5 | operator:6 | operator:7 | operator:9 | operator:10 | operator:11
+u_op = operator:4 | operator:8 | operator:12
+
+operator:0 = '='|'+='|'-='|'*='|'/='|'%='|'|='|'&='|'^='|'<<='|'>>='
+operator:1 = '++'|'--'|'+'|'-'
+operator:2 = 'or'
+operator:3 = 'and'
+operator:4 = 'not'
+operator:5 = '=='|'!='|'<'|'>'|'<='|'>='
+operator:6 = '+'|'-'
+operator:7 = '*'|'/'|'%'
+operator:8 = '-'
+operator:9 = '|'
+operator:10 = '&'|'^'
+operator:11 = '<<'|'>>'
+operator:12 = '~'
+
+value = dec | hex | bin | str | char | bool
+dec = m/[0-9]*/
+hex = m/0x[0-9a-fA-F]*/
+bin = m/0b[01]*/
+str = m/"([^"]|\\")*"/
+char = m/'([^']|\\')'/
+bool = m/true|false/
+

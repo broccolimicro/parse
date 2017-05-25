@@ -1,0 +1,19 @@
+import common
+
+enum = 'enum' name? '{' name* '}'
+
+struct = 'struct' name? '{' declaration* '}'
+
+union = 'union' name? '{' declaration* '}'
+
+typename = enum | struct | union | name
+
+function = typename name '(' (name (',' name)*)? ')' '{'
+
+body = declaration | for | if | assignment
+
+for = 'for' expr:0? '{' body '}'
+if = 'if' '(' expr:0 ')' '{' body '}' \
+		('else' 'if' '(' expr:0 ')' '{' body '}')* \
+		('else' '{' body '}')?
+

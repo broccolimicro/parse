@@ -1,0 +1,11 @@
+import chp
+import prs
+
+ucs = process*
+
+process = 'proc' name '{' (declaration | behavior)* '}'
+
+declaration = typename name (',' name)* ';'
+
+behavior = 'prs' '{' prs '}' | 'chp' '{' chp '}'
+

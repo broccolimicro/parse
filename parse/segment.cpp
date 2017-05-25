@@ -1,11 +1,8 @@
-/*
- * segment.cpp
- *
- *  Created on: Oct 15, 2014
- *      Author: nbingham
- */
-
+#include <std/file.h>
+#include <std/fill.h>
 #include "segment.h"
+
+using namespace core;
 
 segment::segment()
 {
@@ -13,73 +10,293 @@ segment::segment()
 
 segment::~segment()
 {
-
 }
 
-int segment::char_to_line(int character_index)
+void segment::load(string name)
 {
-	return (upper_bound(lines.begin(), lines.end(), character_index) - lines.begin()) - 1;
+	this->name = name;
+	file buf(name.c_str(), "r");
+
+	while (buf)
+		lines.push_back(buf.read("\n"));
 }
 
-int segment::char_to_token(int character_index)
+segment::iterator segment::begin()
 {
-	return (upper_bound(tokens.begin(), tokens.end(), ::token(character_index, character_index, 0)) - tokens.begin()) - 1;
+	return segment::iterator(this, lines.begin(), lines.begin()->begin());
 }
 
-int segment::token_to_line(int token_index)
+segment::iterator segment::end()
 {
-	return char_to_line(tokens[token_index].start);
+	return segment::iterator(this, lines.rbegin(), lines.rbegin()->end());
 }
 
-int segment::token_to_char(int token_index)
+segment::iterator segment::rbegin()
 {
-	return tokens[token_index].start;
+	return segment::iterator(this, lines.rbegin(), lines.rbegin()->rbegin());
 }
 
-int segment::line_to_token(int line_number)
+segment::iterator segment::rend()
 {
-	return char_to_token(lines[line_number]);
+	return segment::iterator (this, lines.begin(), lines.begin()->rend());
 }
 
-int segment::line_to_char(int line_number)
+
+
+
+// Segment Iterator
+
+segment::iterator::iterator()
 {
-	return lines[line_number];
+	root = NULL;
 }
 
-segment segment::subseg(int character_index, int character_length)
+segment::iterator::iterator(segment *root, array<string>::iterator line, string::iterator c)
 {
-	segment result;
-	result.name = name;
-	result.buffer = buffer.substr(character_index, character_length);
-	vector<int>::iterator start = upper_bound(lines.begin(), lines.end(), character_index);
-	vector<int>::iterator end = lower_bound(start, lines.end(), character_index+character_length);
-	result.lines.reserve(end - start + 1);
-	result.lines.push_back(0);
-	for (vector<int>::iterator i = start+1; i != end; i++)
-		result.lines.push_back(*i - character_length);
+	this->root = root;
+	this->line = line;
+	this->c = c;
+}
 
+segment::iterator::~iterator()
+{
+}
+
+segment::iterator::operator bool() const
+{
+	return root != NULL && line && c;
+}
+		
+char &segment::iterator::operator*() const
+{
+	return *c;
+}
+
+char *segment::iterator::ptr() const
+{
+	return c.ptr();
+}
+
+char &segment::iterator::get() const
+{
+	return c.get();
+}
+		
+segment::iterator &segment::iterator::operator++(int)
+{
+	c++;
+	if (!c)
+	{
+		line++;
+		if (line)
+			c = line->begin();
+	}
+
+	return *this;
+}
+
+segment::iterator &segment::iterator::operator--(int)
+{
+	c--;
+	if (!c)
+	{
+		line--;
+		if (line)
+			c = line->rbegin();
+	}
+
+	return *this;
+}
+
+segment::iterator &segment::iterator::operator++()
+{
+	c++;
+	if (!c)
+	{
+		line++;
+		if (line)
+			c = line->begin();
+	}
+
+	return *this;
+}
+
+segment::iterator &segment::iterator::operator--()
+{
+	c--;
+	if (!c)
+	{
+		line--;
+		if (line)
+			c = line->rbegin();
+	}
+
+	return *this;
+}
+
+segment::iterator &segment::iterator::operator+=(int n)
+{
+	while (line && n > (line->end() - c))
+	{
+		n -= (line->end() - c);
+		line++;
+		if (line)
+			c = line->begin();
+		else
+			c = string::iterator();
+	}
+
+	c += n;
+
+	return *this;
+}
+
+segment::iterator &segment::iterator::operator-=(int n)
+{
+	while (line && n > (c - line->begin()))
+	{
+		n -= (c - line->begin());
+		line--;
+
+		if (line)
+			c = line->rbegin();
+		else
+			c = string::iterator();
+	}
+
+	c -= n;
+
+	return *this;
+}
+
+segment::iterator segment::iterator::operator+(int n) const
+{
+	segment::iterator result = *this;
+	result += n;
 	return result;
 }
 
-string segment::substr(int character_index, int character_length)
+segment::iterator segment::iterator::operator-(int n) const
 {
-	return buffer.substr(character_index, character_length);
+	segment::iterator result = *this;
+	result -= n;
+	return result;
 }
 
-string segment::get_token(int token_index)
+bool segment::iterator::operator==(iterator i) const
 {
-	if (token_index >= 0 && token_index < (int)tokens.size())
-		return buffer.substr(tokens[token_index].start, tokens[token_index].end - tokens[token_index].start);
-	else
-		return "";
+	return line == i.line && c == i.c;
 }
 
-string segment::get_line(int line_index)
+bool segment::iterator::operator!=(iterator i) const
 {
-	if (line_index >= 0 && line_index < (int)lines.size()-1)
-		return buffer.substr(lines[line_index], lines[line_index+1]-lines[line_index]);
-	else if (line_index >= 0 && line_index == (int)lines.size()-1)
-		return buffer.substr(lines[line_index]);
-	else
-		return "";
+	return line != i.line || c != i.c;
 }
+
+bool segment::iterator::operator<(iterator i) const
+{
+	return line < i.line || (line == i.line && c < i.c);
+}
+
+bool segment::iterator::operator>(iterator i) const
+{
+	return line > i.line || (line == i.line && c > i.c);
+}
+
+bool segment::iterator::operator<=(iterator i) const
+{
+	return line < i.line || (line == i.line && c <= i.c);
+}
+
+bool segment::iterator::operator>=(iterator i) const
+{
+	return line > i.line || (line == i.line && c >= i.c);
+}
+
+int segment::iterator::operator-(iterator i) const
+{
+	int result = 0;
+	while (i && i != *this)
+	{
+		result += i.line->size();
+		i++;
+	}
+	return result;
+}
+
+string segment::iterator::file_name()
+{
+	return root->name;
+}
+
+int segment::iterator::line_number()
+{
+	return line.idx();
+}
+
+int segment::iterator::char_number()
+{
+	return c.idx();
+}
+
+pair<int, int> segment::iterator::col_number()
+{
+	pair<int, int> result(0, 0);
+	for (string::iterator i = line->begin(); i != c; i++)
+	{
+		if (*i == '\t')
+		{
+			result.first += 1;
+			result.second += 4;
+		}
+		else
+		{
+			result.first += 1;
+			result.second += 1;
+		}
+	}
+	return result;
+}
+
+string segment::iterator::report()
+{
+	pair<int, int> col = col_number();
+	string result;
+	result << file_name() << ":" << line_number();
+	result << ":" << col.first << "-" << col.second;
+	return result;
+}
+
+string segment::iterator::pointer(int length)
+{
+	string result = *line;
+	string::iterator i;
+	for (i = result.begin(); i != c; i++)
+		if (*i != '\t')
+			*i = ' ';
+	i.drop(result.size());
+	result << string(fill<char>(max(length, 1), '^')) << "\n";
+	return result;
+}
+
+void segment::iterator::note(string msg, int length)
+{
+	printf("%s note: %s\n", report().c_str(), msg.c_str());
+	printf("%s", line->c_str());
+	printf("%s", pointer(length).c_str());
+}
+
+void segment::iterator::warn(string msg, int length)
+{
+	printf("%s note: %s\n", report().c_str(), msg.c_str());
+	printf("%s", line->c_str());
+	printf("%s", pointer(length).c_str());
+}
+
+void segment::iterator::error(string msg, int length)
+{
+	printf("%s note: %s\n", report().c_str(), msg.c_str());
+	printf("%s", line->c_str());
+	printf("%s", pointer(length).c_str());
+}
+
