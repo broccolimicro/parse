@@ -13,8 +13,12 @@ using namespace core;
 
 struct segment
 {
+	typedef char type;
+
 	struct iterator
 	{
+		typedef char type;
+
 		segment *root;
 		array<string>::iterator line;
 		string::iterator c;
@@ -52,10 +56,6 @@ struct segment
 
 		string report();
 		string pointer(int length = 1);
-
-		void note(string msg, int length = 1);
-		void warn(string msg, int length = 1);
-		void error(string msg, int length = 1);
 	};
 
 	segment();

@@ -18,7 +18,11 @@ void segment::load(string name)
 	file buf(name.c_str(), "r");
 
 	while (buf)
-		lines.push_back(buf.read("\n"));
+	{
+		string line = buf.read("\n");
+		if (line.size() > 0)
+			lines.push_back(line);
+	}
 }
 
 segment::iterator segment::begin()
@@ -28,7 +32,7 @@ segment::iterator segment::begin()
 
 segment::iterator segment::end()
 {
-	return segment::iterator(this, lines.rbegin(), lines.rbegin()->end());
+	return segment::iterator(this, lines.end(), string::iterator());
 }
 
 segment::iterator segment::rbegin()
@@ -38,7 +42,7 @@ segment::iterator segment::rbegin()
 
 segment::iterator segment::rend()
 {
-	return segment::iterator (this, lines.begin(), lines.begin()->rend());
+	return segment::iterator(this, lines.rend(), string::iterator());
 }
 
 
@@ -84,12 +88,17 @@ char &segment::iterator::get() const
 		
 segment::iterator &segment::iterator::operator++(int)
 {
-	c++;
-	if (!c)
+	if (line)
 	{
-		line++;
-		if (line)
-			c = line->begin();
+		c++;
+		while (!c && line)
+		{
+			line++;
+			if (line)
+				c = line->begin();
+			else
+				c = string::iterator();
+		}
 	}
 
 	return *this;
@@ -97,12 +106,17 @@ segment::iterator &segment::iterator::operator++(int)
 
 segment::iterator &segment::iterator::operator--(int)
 {
-	c--;
-	if (!c)
+	if (line)
 	{
-		line--;
-		if (line)
-			c = line->rbegin();
+		c--;
+		while (!c && line)
+		{
+			line--;
+			if (line)
+				c = line->rbegin();
+			else
+				c = string::iterator();
+		}
 	}
 
 	return *this;
@@ -110,12 +124,17 @@ segment::iterator &segment::iterator::operator--(int)
 
 segment::iterator &segment::iterator::operator++()
 {
-	c++;
-	if (!c)
+	if (line)
 	{
-		line++;
-		if (line)
-			c = line->begin();
+		c++;
+		while (!c && line)
+		{
+			line++;
+			if (line)
+				c = line->begin();
+			else
+				c = string::iterator();
+		}
 	}
 
 	return *this;
@@ -123,12 +142,17 @@ segment::iterator &segment::iterator::operator++()
 
 segment::iterator &segment::iterator::operator--()
 {
-	c--;
-	if (!c)
+	if (line)
 	{
-		line--;
-		if (line)
-			c = line->rbegin();
+		c--;
+		while (!c && line)
+		{
+			line--;
+			if (line)
+				c = line->rbegin();
+			else
+				c = string::iterator();
+		}
 	}
 
 	return *this;
@@ -136,7 +160,7 @@ segment::iterator &segment::iterator::operator--()
 
 segment::iterator &segment::iterator::operator+=(int n)
 {
-	while (line && n > (line->end() - c))
+	while (line && n >= (line->end() - c))
 	{
 		n -= (line->end() - c);
 		line++;
@@ -146,7 +170,8 @@ segment::iterator &segment::iterator::operator+=(int n)
 			c = string::iterator();
 	}
 
-	c += n;
+	if (c)
+		c += n;
 
 	return *this;
 }
@@ -157,14 +182,14 @@ segment::iterator &segment::iterator::operator-=(int n)
 	{
 		n -= (c - line->begin());
 		line--;
-
 		if (line)
 			c = line->rbegin();
 		else
 			c = string::iterator();
 	}
 
-	c -= n;
+	if (c)
+		c -= n;
 
 	return *this;
 }
@@ -216,11 +241,13 @@ bool segment::iterator::operator>=(iterator i) const
 int segment::iterator::operator-(iterator i) const
 {
 	int result = 0;
-	while (i && i != *this)
+	while (i && i.line < line)
 	{
-		result += i.line->size();
-		i++;
+		result += i.line->end() - i.c;
+		i.line++;
+		i.c = i.line->begin();
 	}
+	result += c - i.c;
 	return result;
 }
 
@@ -277,26 +304,5 @@ string segment::iterator::pointer(int length)
 	i.drop(result.size());
 	result << string(fill<char>(max(length, 1), '^')) << "\n";
 	return result;
-}
-
-void segment::iterator::note(string msg, int length)
-{
-	printf("%s note: %s\n", report().c_str(), msg.c_str());
-	printf("%s", line->c_str());
-	printf("%s", pointer(length).c_str());
-}
-
-void segment::iterator::warn(string msg, int length)
-{
-	printf("%s note: %s\n", report().c_str(), msg.c_str());
-	printf("%s", line->c_str());
-	printf("%s", pointer(length).c_str());
-}
-
-void segment::iterator::error(string msg, int length)
-{
-	printf("%s note: %s\n", report().c_str(), msg.c_str());
-	printf("%s", line->c_str());
-	printf("%s", pointer(length).c_str());
 }
 
