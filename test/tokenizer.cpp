@@ -2,7 +2,7 @@
 
 #include <parse/segment.h>
 #include <parse/tokenizer.h>
-#include <parse/default.h>
+#include "default.h"
 
 using namespace core;
 

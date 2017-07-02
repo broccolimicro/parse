@@ -6,7 +6,7 @@
  */
 
 #include "default.h"
-#include "error.h"
+#include <parse/error.h>
 
 namespace parse
 {

@@ -6,6 +6,7 @@
  */
 
 #include "tokenizer.h"
+#include <std/fill.h>
 
 #define FAIL(msg) fail(__FILE__, __LINE__, msg)
 #define ERROR(msg) error(__FILE__, __LINE__, msg)
@@ -84,28 +85,60 @@ tokenizer::iterator tokenizer::push(expecter e)
 
 bool tokenizer::pop()
 {
+	static int tab_count = 0;
+	string tab(fill<char>(tab_count, '\t'));
+
+	printf("%senter tokenizer::pop()\n", tab.c_str());
+	printf("%svalue: \"%s\"\n", tab.c_str(), string(source.syntax).c_str());
+
+	tab_count++;
 	skip();
+	tab_count--;
+
+	printf("%safter skip()\n", tab.c_str());
+	printf("%svalue: \"%s\"\n", tab.c_str(), string(source.syntax).c_str());
+
+	tab_count++;
 
 	tokenizer result;
 	bool top = next(&result);
 	
-	if (!result)
+	tab_count--;
+
+	printf("%snext() %d\n", tab.c_str(), (bool)result);
+	printf("%svalue: \"%s\"\n", tab.c_str(), string(result.source.syntax).c_str());
+
+	if (!result && stack.back().required)
 	{
 		ERROR("expected " + expected_string());
+		msgs.append_back(result.msgs);
+		failures += result.failures;
+		errors += result.errors;
+		warnings += result.warnings;
+		notes += result.notes;
 
+		tab_count++;
 		// to reduce spurious errors, we move ahead
 		// until we find what we are looking for
-		do
+		while (!result && source.end())
 		{
 			inc();
 			top = next(&result);
-		} while (!result && source.end());
+		}
+
+		tab_count--;
 	}
-	
+
+	printf("%safter !result\n", tab.c_str());
+	printf("%svalue: \"%s\"\n", tab.c_str(), string(source.syntax).c_str());
+
 	stack.drop_back();
-	if (top)
+	if (result && top)
 		inc(result);
-	
+
+	printf("%sexit tokenizer::pop()\n", tab.c_str());
+	printf("%svalue: \"%s\"\n", tab.c_str(), string(source.syntax).c_str());
+
 	return top;
 }
 
@@ -119,9 +152,24 @@ bool tokenizer::next(tokenizer *result)
 
 		for (array<pair<parse_fn, const void*> >::iterator j = i->options.begin(); j != i->options.end(); j++)
 		{
-			tokenizer result = j->first(source.end(), j->second);
-			if (result)
-				results.push_back(result);
+			tokenizer parsed = j->first(source.end(), j->second);
+			printf("parse() %d\n", (bool)parsed);
+			printf("value: \"%s\"\n", string(parsed.source.syntax).c_str());
+
+	
+			if (top && i->required)
+			{
+				msgs.append_back(parsed.msgs);
+				failures += parsed.failures;
+				errors += parsed.errors;
+				warnings += parsed.warnings;
+				notes += parsed.notes;
+			}
+
+			if (parsed)
+				results.push_back(parsed);
+			else
+				parsed.emit();
 		}
 
 		if (i->required)
@@ -139,11 +187,13 @@ bool tokenizer::next(tokenizer *result)
 		}
 
 		*result = results[0];
+		return top;
 	}
 	else
+	{
 		*result = tokenizer();
-
-	return top;
+		return false;
+	}
 }
 
 void tokenizer::expect(parse_fn p, const void *data)
@@ -192,9 +242,14 @@ char tokenizer::peek(int off)
 
 char tokenizer::inc(int off)
 {
-	char result = *source.syntax.finish;
-	source.syntax.finish += off;
-	return result;
+	if (source.syntax.finish)
+	{
+		char result = *source.syntax.finish;
+		source.syntax.finish += off;
+		return result;
+	}
+	else
+		return '\0';
 }
 
 void tokenizer::inc(token t)

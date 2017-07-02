@@ -5,8 +5,8 @@
  *      Author: nbingham
  */
 
-#include "segment.h"
-#include "tokenizer.h"
+#include <parse/segment.h>
+#include <parse/tokenizer.h>
 
 #pragma once
 

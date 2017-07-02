@@ -26,4 +26,6 @@ struct token
 
 	segment::iterator &begin();
 	segment::iterator &end();	
+
+	void emit(string tab = "");
 };

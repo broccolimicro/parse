@@ -1,6 +1,0 @@
-import common
-
-prs = rule*
-
-rule = expr:0 '->' assignment
-
