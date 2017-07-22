@@ -13,6 +13,7 @@ TEST(tokenizer, load)
 	seg.load("test/tokenizer.in");
 
 	tokenizer tok("test", seg.begin());
+	tok.push_ignore();
 	tok.ignore(parse::white_space);
 
 	tok.push();

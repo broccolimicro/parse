@@ -21,11 +21,15 @@ struct token
 	string type;
 	slice<range<segment::iterator> > syntax;
 	array<token> tokens;
-
+	
 	operator bool();
-
+	
 	segment::iterator &begin();
 	segment::iterator &end();	
 
+	char peek(int off = 0);
+	char inc(int off = 1);
 	void emit(string tab = "");
+
+	token &reset();
 };
