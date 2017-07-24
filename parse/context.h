@@ -4,17 +4,10 @@
 
 #include <std/array.h>
 
-/*#define FAIL(msg) fail(__FILE__, __LINE__, msg)
-#define ERROR(msg) error(__FILE__, __LINE__, msg)
-#define WARN(msg) warn(__FILE__, __LINE__, msg)
-#define NOTE(msg) note(__FILE__, __LINE__, msg)
-#define ELAB(msg) elab(__FILE__, __LINE__, msg)
-*/
-
-struct context
+struct context_t
 {
-	context();
-	~context();
+	context_t();
+	~context_t();
 
 	array<message> msgs;
 	int failures;
@@ -24,11 +17,13 @@ struct context
 
 	operator bool();
 	
-	void fail(string file, int line, string msg, int len = 1);
-	void error(string file, int line, string msg, int len = 1);
-	void warn(string file, int line, string msg, int len = 1);
-	void note(string file, int line, string msg, int len = 1);
+	void fail(string file, int line, string msg, segment::iterator start, int len = 1);
+	void error(string file, int line, string msg, segment::iterator start, int len = 1);
+	void warn(string file, int line, string msg, segment::iterator start, int len = 1);
+	void note(string file, int line, string msg, segment::iterator start, int len = 1);
 	void elab(string file, int line, string msg);
+
+	void extend(context_t ctx);
 
 	void emit();
 

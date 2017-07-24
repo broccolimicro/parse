@@ -2,12 +2,15 @@
 
 #include "token.h"
 #include "segment.h"
+#include "context.h"
 
-struct symbol
+struct symbol_t
 {
-	symbol() {}
-	virtual ~symbol() {}
+	symbol_t() {}
+	virtual ~symbol_t() {}
 
-	virtual token parse(segment::iterator) = 0;
+	string type;
+
+	virtual token_t parse(segment::iterator source, context_t *context = NULL) = 0;
 };
 

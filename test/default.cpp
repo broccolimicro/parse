@@ -11,9 +11,18 @@
 namespace parse
 {
 
-tokenizer white_space(segment::iterator start, const void *data)
+whitespace::whitespace()
 {
-	tokenizer result("whitespace", start);
+	type = "whitespace";
+}
+
+whitespace::~whitespace()
+{
+}
+
+token_t whitespace::parse(segment::iterator source, context_t *context)
+{
+	token_t result("whitespace", source);
 
 	char c = result.peek();
 	while (c == ' ' || c == '\t' || c == '\n' || c == '\r')
@@ -25,9 +34,18 @@ tokenizer white_space(segment::iterator start, const void *data)
 	return result;
 }
 
-tokenizer text(segment::iterator start, const void *data)
+text::text()
 {
- 	tokenizer result("text", start);
+	type = "text";
+}
+
+text::~text()
+{
+}
+
+token_t text::parse(segment::iterator source, context_t *context)
+{
+ 	token_t result("text", source);
 
 	char base = result.peek();
 	if (base == '\'' || base == '\"')
@@ -50,7 +68,8 @@ tokenizer text(segment::iterator start, const void *data)
 				done = true;
 			else if (c == '\0')
 			{
-				ERROR("dangling string expression");
+				if (context)
+					ERROR(*context, result.end(), "dangling string expression");
 				return result;
 			}
 		}
@@ -59,9 +78,9 @@ tokenizer text(segment::iterator start, const void *data)
 	return result;
 }
 
-tokenizer dec_integer(segment::iterator start, const void *data)
+token_t dec_integer(segment::iterator source, context_t *context)
 {
-	tokenizer result("decimal integer", start);
+	token_t result("integer", source);
 
 	char c = result.peek();
 	while (c >= '0' && c <= '9')
@@ -73,9 +92,9 @@ tokenizer dec_integer(segment::iterator start, const void *data)
 	return result;
 }
 
-tokenizer hex_integer(segment::iterator start, const void *data)
+token_t hex_integer(segment::iterator source, context_t *context)
 {
-	tokenizer result("hexidecimal integer", start);
+	token_t result("integer", source);
 
 	if (result.peek() == '0' && result.peek(1) == 'x')
 	{
@@ -94,9 +113,9 @@ tokenizer hex_integer(segment::iterator start, const void *data)
 	return result;
 }
 
-tokenizer oct_integer(segment::iterator start, const void *data)
+token_t oct_integer(segment::iterator source, context_t *context)
 {
-	tokenizer result("octal integer", start);
+	token_t result("integer", source);
 
 	if (result.peek() == '0' && result.peek(1) == 'o')
 	{
@@ -113,9 +132,9 @@ tokenizer oct_integer(segment::iterator start, const void *data)
 	return result;
 }
 
-tokenizer bin_integer(segment::iterator start, const void *data)
+token_t bin_integer(segment::iterator source, context_t *context)
 {
-	tokenizer result("binary integer", start);
+	token_t result("integer", source);
 
 	if (result.peek() == '0' && result.peek(1) == 'b')
 	{
@@ -132,26 +151,44 @@ tokenizer bin_integer(segment::iterator start, const void *data)
 	return result;
 }
 
-tokenizer integer(segment::iterator start, const void *data)
+integer::integer()
 {
-	if (start && *start == '0')
+	type = "integer";
+}
+
+integer::~integer()
+{
+}
+
+token_t integer::parse(segment::iterator source, context_t *context)
+{
+	if (source && *source == '0')
 	{
-		char base = *(start+1);
+		char base = *(source+1);
 		switch (base)
 		{
-		case 'x': return hex_integer(start, data);
-		case 'o': return oct_integer(start, data);
-		case 'b': return bin_integer(start, data);
-		default: return dec_integer(start, data);
+		case 'x': return hex_integer(source, context);
+		case 'o': return oct_integer(source, context);
+		case 'b': return bin_integer(source, context);
+		default: return dec_integer(source, context);
 		}
 	}
 	else
-		return dec_integer(start, data);
+		return dec_integer(source, context);
 }
 
-tokenizer real(segment::iterator start, const void *data)
+real::real()
 {
-	tokenizer result("real", start);
+	type = "real";
+}
+
+real::~real()
+{
+}
+
+token_t real::parse(segment::iterator source, context_t *context)
+{
+	token_t result("real", source);
 
 	char c = result.peek();
 	while (c >= '0' && c <= '9')
@@ -186,7 +223,8 @@ tokenizer real(segment::iterator start, const void *data)
 		}
 
 		if (c < '0' || c > '9')
-			ERROR("missing exponent in real");
+			if (context)
+				ERROR(*context, result.end(), "missing exponent in real");
 
 		while (c >= '0' && c <= '9')
 		{
@@ -200,14 +238,27 @@ tokenizer real(segment::iterator start, const void *data)
 	// If there is neither a decimal point nor an exponent,
 	// then this is an integer instead of a real value
 	if (!decimal && !exponent)
+	{
+		if (context)
+			ERROR(*context, result.begin(), "this is an integer, not decimal value");
 		return result.reset();
+	}
 	else
 		return result;
 }
 
-tokenizer instance(segment::iterator start, const void *data)
+instance::instance()
 {
-	tokenizer result("instance", start);
+	type = "instance";
+}
+
+instance::~instance()
+{
+}
+
+token_t instance::parse(segment::iterator source, context_t *context)
+{
+	token_t result("instance", source);
 
 	char c = result.peek();
 	if ((c >= 'a' && c <= 'z') ||
@@ -230,9 +281,18 @@ tokenizer instance(segment::iterator start, const void *data)
 	return result;
 }
 
-tokenizer line_comment(segment::iterator start, const void *data)
+line_comment::line_comment()
 {
-	tokenizer result("line comment", start);
+	type = "line comment";
+}
+
+line_comment::~line_comment()
+{
+}
+
+token_t line_comment::parse(segment::iterator source, context_t *context)
+{
+	token_t result("line comment", source);
 
 	if (result.peek() == '/' && result.peek(1) == '/')
 	{
@@ -249,9 +309,18 @@ tokenizer line_comment(segment::iterator start, const void *data)
 	return result;
 }
 
-tokenizer block_comment(segment::iterator start, const void *data)
+block_comment::block_comment()
 {
-	tokenizer result("block comment", start);
+	type = "block comment";
+}
+
+block_comment::~block_comment()
+{
+}
+
+token_t block_comment::parse(segment::iterator source, context_t *context)
+{
+	token_t result("block comment", source);
 
 	if (result.peek() == '/' && result.peek(1) == '*')
 	{
@@ -262,7 +331,8 @@ tokenizer block_comment(segment::iterator start, const void *data)
 		{
 			if (c0 == '\0')
 			{
-				ERROR("dangling block comment");
+				if (context)
+					ERROR(*context, result.end(), "dangling block comment");
 				return result;
 			}
 
@@ -277,14 +347,33 @@ tokenizer block_comment(segment::iterator start, const void *data)
 	return result;
 }
 
-tokenizer keyword(segment::iterator start, const void *data)
+keyword::keyword()
 {
-	tokenizer result("keyword", start);
+	type = "keyword";
+}
+
+keyword::keyword(string value)
+{
+	this->type = "keyword";
+	this->value = value;
+}
+
+keyword::~keyword()
+{
+}
+
+token_t keyword::parse(segment::iterator source, context_t *context)
+{
+	token_t result("keyword", source);
 	
-	for (const char *k = (const char*)data; *k; k++)
+	for (string::iterator k = value.begin(); k != value.end(); k++)
 	{
 		if (*k != result.peek())
+		{
+			if (context)
+				ERROR(*context, result.begin(), "expected keyword \"" + value + "\"");
 			return result.reset();
+		}
 
 		result.inc();
 	}

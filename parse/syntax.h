@@ -3,19 +3,40 @@
 #include <std/graph.h>
 
 #include "symbol.h"
+#include "context.h"
 
-struct syntax : symbol
+struct syntax_t : symbol_t
 {
-	typedef iterator core::graph<symbol*>::iterator;
+	typedef core::graph<symbol_t*> graph;
 
-	syntax();
-	syntax(string type);
-	~syntax();
+	struct iterator
+	{
+		iterator();
+		iterator(string type, graph::iterator node, segment::iterator source);
+		iterator(string type, graph::link_iterator branch, segment::iterator source);
+		~iterator();
 
-	string type;
-	core::graph<symbol*> def;
-	iterator start;
+		struct {
+			token_t token;
+			context_t context;
+		} closest, curr;
 
-	token parse(segment::iterator seg);
+		graph::iterator node;
+		graph::link_iterator branch;
+
+		bool next();
+		bool next_branch();
+	};
+
+	syntax_t();
+	syntax_t(string type);
+	~syntax_t();
+
+	graph syntax;
+	array<symbol*> ignore;
+	graph::iterator start;
+
+	void skip();
+	token_t parse(segment::iterator source, context_t *context = NULL);
 };
 

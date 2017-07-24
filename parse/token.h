@@ -11,16 +11,16 @@
 
 #pragma once
 
-struct token
+struct token_t
 {
-	token();
-	token(string type);
-	token(string type, segment::iterator start);
-	~token();
+	token_t();
+	token_t(string type);
+	token_t(string type, segment::iterator start);
+	~token_t();
 
 	string type;
-	slice<range<segment::iterator> > syntax;
-	array<token> tokens;
+	slice<range<segment::iterator> > source;
+	array<token_t> tokens;
 	
 	operator bool();
 	
@@ -30,10 +30,11 @@ struct token
 	char peek(int off = 0);
 	char inc(int off = 1);
 
-	void append(token t);
-	void append(array<token> t);
+	void append(token_t t);
+	void append(array<token_t> t);
+	void extend(token_t t);
 	
 	void emit(string tab = "");
 
-	token &reset();
+	token_t &reset();
 };
