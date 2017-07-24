@@ -30,6 +30,9 @@ struct token_t
 	char peek(int off = 0);
 	char inc(int off = 1);
 
+	void skip(token_t t);
+	void skip(array<token_t> t);
+
 	void append(token_t t);
 	void append(array<token_t> t);
 	void extend(token_t t);

@@ -62,6 +62,20 @@ char token_t::inc(int off)
 		return '\0';
 }
 
+void token_t::skip(token_t t)
+{
+	if (!source.finish || t.source.finish > source.finish)
+		source.finish = t.source.finish;
+	if (!source.start || t.source.start < source.start)
+		source.start = t.source.start;
+}
+
+void token_t::skip(array<token_t> t)
+{
+	for (array<token_t>::iterator i = t.begin(); i != t.end(); i++)
+		skip(*i);
+}
+
 void token_t::append(token_t t)
 {
 	if (!source.finish || t.source.finish > source.finish)

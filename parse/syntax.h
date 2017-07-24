@@ -33,10 +33,9 @@ struct syntax_t : symbol_t
 	~syntax_t();
 
 	graph syntax;
-	array<symbol*> ignore;
+	array<symbol_t*> ignore;
 	graph::iterator start;
 
-	void skip();
 	token_t parse(segment::iterator source, context_t *context = NULL);
 };
 

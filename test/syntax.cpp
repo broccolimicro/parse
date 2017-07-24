@@ -31,6 +31,10 @@ TEST(syntax, load)
 	cur = cur.push(symbols["integer"]);
 	cur = cur.push(symbols["text"]);
 
+	test.ignore.push_back(symbols["whitespace"]);
+	test.ignore.push_back(symbols["line comment"]);
+	test.ignore.push_back(symbols["block comment"]);
+
 	context_t context;
 	token_t result;
 

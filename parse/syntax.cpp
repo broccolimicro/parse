@@ -66,11 +66,6 @@ syntax_t::~syntax_t()
 {
 }
 
-void syntax_t::skip()
-{
-	
-}
-
 /*
 Each syntax parse function has a stack of choice points.
 Each element in the stack contains an iterator along the possible
@@ -87,7 +82,16 @@ token_t syntax_t::parse(segment::iterator source, context_t *context)
 	{
 		array<syntax_t::iterator>::iterator curr = stack.rbegin();
 
-		skip();		
+		token_t skipped;
+		do
+		{
+			skipped = token_t();
+			for (array<symbol_t*>::iterator i = ignore.begin(); i != ignore.end() && !skipped; i++)
+				skipped = (*i)->parse(curr->curr.token.end(), &(curr->curr.context));
+
+			if (skipped)
+				curr->curr.token.skip(skipped);
+		} while (skipped);
 
 		if (curr->next())
 		{
