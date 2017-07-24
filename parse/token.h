@@ -29,6 +29,10 @@ struct token
 
 	char peek(int off = 0);
 	char inc(int off = 1);
+
+	void append(token t);
+	void append(array<token> t);
+	
 	void emit(string tab = "");
 
 	token &reset();

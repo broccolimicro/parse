@@ -6,12 +6,16 @@
 
 struct syntax : symbol
 {
+	typedef iterator core::graph<symbol*>::iterator;
+
 	syntax();
+	syntax(string type);
 	~syntax();
 
+	string type;
 	core::graph<symbol*> def;
-	core::graph<symbol*>::iterator start;
+	iterator start;
 
-	token parse(segment::iterator start);
+	token parse(segment::iterator seg);
 };
 

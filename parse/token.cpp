@@ -62,6 +62,17 @@ char token::inc(int off)
 		return '\0';
 }
 
+void token::append(token t)
+{
+	
+}
+
+void token::append(array<token> t)
+{
+	for (array<token>::iterator i = t.begin(); i != t.end(); i++)
+		append(*t);
+}
+
 void token::emit(string tab)
 {
 	printf("%s%s: \"%s\"\n", tab.c_str(), type.c_str(), string(syntax).c_str());
