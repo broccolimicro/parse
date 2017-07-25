@@ -66,6 +66,7 @@ void context_t::emit()
 
 void context_t::reset()
 {
+	msgs.clear();
 	failures = 0;
 	errors = 0;
 	warnings = 0;

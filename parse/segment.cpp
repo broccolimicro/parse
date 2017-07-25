@@ -8,6 +8,11 @@ segment::segment()
 {
 }
 
+segment::segment(string name)
+{
+	load(name);
+}
+
 segment::~segment()
 {
 }

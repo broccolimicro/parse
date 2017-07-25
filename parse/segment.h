@@ -59,6 +59,7 @@ struct segment
 	};
 
 	segment();
+	segment(string name);
 	~segment();
 
 	string name;

@@ -34,7 +34,7 @@ struct syntax_t : symbol_t
 
 	graph syntax;
 	array<symbol_t*> ignore;
-	graph::iterator start;
+	graph::links start;
 
 	token_t parse(segment::iterator source, context_t *context = NULL);
 };

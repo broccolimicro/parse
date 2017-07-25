@@ -27,7 +27,7 @@ TEST(syntax, load)
 	syntax_t test("test");
 	syntax_t::graph::iterator cur;
 	cur = test.syntax.insert(symbols["keyword"]);
-	test.start = cur;
+	test.start.push_back(cur);
 	cur = cur.push(symbols["integer"]);
 	cur = cur.push(symbols["text"]);
 

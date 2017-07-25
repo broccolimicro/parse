@@ -76,7 +76,7 @@ choices, an iterator along the syntax graph, and a token.
 token_t syntax_t::parse(segment::iterator source, context_t *context)
 {
 	array<syntax_t::iterator> stack;
-	stack.push_back(syntax_t::iterator(type, start, source));
+	stack.push_back(syntax_t::iterator(type, start.begin(), source));
 
 	while (stack.size() > 0)
 	{
@@ -102,7 +102,7 @@ token_t syntax_t::parse(segment::iterator source, context_t *context)
 				stack.push_back(syntax_t::iterator(type, next.begin(), curr->curr.token.end()));
 			else
 			{
-				token_t result;
+				token_t result(type);
 				for (array<syntax_t::iterator>::iterator i = stack.begin(); i != stack.end(); i++)
 				{
 					result.extend(i->curr.token);
@@ -119,21 +119,21 @@ token_t syntax_t::parse(segment::iterator source, context_t *context)
 				array<syntax_t::iterator>::iterator prev = curr-1;
 				if (prev)
 				{
-					prev->curr.token.extend(curr->curr.token);
-					prev->curr.context.extend(curr->curr.context);
+					prev->curr.token.extend(curr->closest.token);
+					prev->curr.context.extend(curr->closest.context);
 					stack.drop_back();
 					curr = prev;
 				}
 				else
 				{
 					if (context)
-						context->extend(curr->curr.context);
-					return curr->curr.token;
+						context->extend(curr->closest.context);
+					return curr->closest.token;
 				}
 			}
 		}
 	}
 
-	return token_t();
+	return token_t(type);
 }
 
