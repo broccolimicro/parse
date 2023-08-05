@@ -1,4 +1,4 @@
-# libparse
+# parse
 
 This library contains everything you need to easily write a good parser. This includes
 keeping track of an import tree, tokenizing a string, and handling and reporting parsing errors.
@@ -9,3 +9,14 @@ grammars. So your grammar needs to be determinable by looking at most a few toke
 **Dependencies**:
 
  - common
+
+## License
+
+This project is part of the Haystack synthesis engine.
+
+Licensed by Cornell University under the MIT License.
+
+Written by Ned Bingham.
+Copyright © 2020 Cornell University.
+
+A copy of the MIT License may be found in COPYRIGHT.
