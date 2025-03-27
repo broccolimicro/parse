@@ -33,7 +33,8 @@ token line_comment::consume(tokenizer &tokens, void *data)
 	do
 	{
 		character = tokens.next_char();
-	} while (character != '\0' && character != '\n');
+	} while (character != '\0' and character != '\n');
+	tokens.prev_char();
 
 	result.end = tokens.offset;
 	return result;
