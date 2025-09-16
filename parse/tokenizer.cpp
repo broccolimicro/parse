@@ -45,7 +45,7 @@ void tokenizer::internal(string internal, string debug_file, int debug_line, int
 	if (export_messages)
 		::flag_internal(1);
 	num_internal++;
-	exit(0);
+	//throw std::runtime_error("internal failure");
 }
 
 void tokenizer::error(string error, string debug_file, int debug_line, int token_offset, int character_offset)
