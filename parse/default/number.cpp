@@ -100,8 +100,8 @@ token number::consume(tokenizer &tokens, void *data)
 
 bool number::is_next(tokenizer &tokens, int i, void *data)
 {
-	if (tokens.peek_char(i) == '-')
-		i++;
+	//if (tokens.peek_char(i) == '-')
+	//	i++;
 
 	return (tokens.peek_char(i) >= '0' && tokens.peek_char(i) <= '9');
 }
