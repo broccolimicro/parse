@@ -1,23 +1,14 @@
-/*
- * syntax.h
- *
- *  Created on: Oct 28, 2014
- *      Author: nbingham
- */
+#pragma once
 
 #include <common/standard.h>
 
-#ifndef parse_syntax_h
-#define parse_syntax_h
+namespace parse {
 
-namespace parse
-{
-struct syntax
-{
+struct syntax {
 	syntax()
 	{
 		debug_name = "syntax";
-		valid = false;
+ 		valid = false;
 		segment_name = "";
 		start = -1;
 		end = -1;
@@ -32,12 +23,15 @@ struct syntax
 	virtual string to_string(string tab = "") const = 0;
 	virtual syntax *clone() const = 0;
 
-	template <class type>
-	bool is_a()
-	{
-		return debug_name == type().debug_name;
+	template <typename T>
+	bool is_a() {
+		return debug_name == T().debug_name;
+	}
+
+	template <typename T>
+	T &get() {
+		return *((T*)this);
 	}
 };
-}
 
-#endif
+}
