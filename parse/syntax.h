@@ -24,13 +24,18 @@ struct syntax {
 	virtual syntax *clone() const = 0;
 
 	template <typename T>
-	bool is_a() {
+	bool is_a() const {
 		return debug_name == T().debug_name;
 	}
 
 	template <typename T>
 	T &get() {
 		return *((T*)this);
+	}
+
+	template <typename T>
+	const T &get() const {
+		return *((const T*)this);
 	}
 };
 
