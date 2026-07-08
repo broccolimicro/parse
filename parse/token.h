@@ -1,12 +1,4 @@
-/*
- * token.h
- *
- *  Created on: Oct 28, 2014
- *      Author: nbingham
- */
-
-#ifndef parse_token_h
-#define parse_token_h
+#pragma once
 
 struct token
 {
@@ -21,4 +13,3 @@ struct token
 
 bool operator<(token t1, token t2);
 
-#endif

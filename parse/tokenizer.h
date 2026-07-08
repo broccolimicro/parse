@@ -1,18 +1,10 @@
-/*
- * tokenizer.h
- *
- *  Created on: Apr 7, 2014
- *      Author: nbingham
- */
+#pragma once
 
 #include <common/text.h>
 #include <common/message.h>
 #include "segment.h"
 #include "token.h"
 #include "syntax.h"
-
-#ifndef parse_tokenizer_h
-#define parse_tokenizer_h
 
 struct tokenizer;
 
@@ -202,4 +194,3 @@ struct tokenizer
 	void reset();
 };
 
-#endif

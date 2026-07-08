@@ -12,6 +12,13 @@ struct factory {
 	const Register register_syntax;
 	const Expect expect;
 	const Produce produce;
+	void *data;
+
+	factory();
+	factory(const Register register_syntax, const Expect expect, const Produce produce, void *data=nullptr);
+	~factory();
+
+	operator bool() const;
 };
 
 struct registry {
