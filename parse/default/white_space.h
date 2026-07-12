@@ -1,27 +1,17 @@
-/*
- * white_space.h
- *
- *  Created on: Oct 16, 2014
- *      Author: nbingham
- */
+#pragma once
 
-#include "../parse.h"
+#include "../tokenizer.h"
 
-#ifndef parse_default_white_space_h
-#define parse_default_white_space_h
+namespace parse {
 
-namespace parse
-{
-struct white_space
-{
+struct white_space {
+	string debug_name;
+
 	white_space();
 	~white_space();
 
-	string debug_name;
-
-	static token consume(tokenizer &tokens, void *data = NULL);
-	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
+	static token consume(tokenizer &tokens, std::any data=std::any());
+	static bool is_next(tokenizer &tokens, int i = 1, std::any data=std::any());
 };
-}
 
-#endif
+}

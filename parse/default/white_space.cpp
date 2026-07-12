@@ -19,7 +19,7 @@ white_space::~white_space()
 
 }
 
-token white_space::consume(tokenizer &tokens, void *data)
+token white_space::consume(tokenizer &tokens, std::any data)
 {
 	token result;
 	result.type = tokens.token_type<white_space>();
@@ -34,7 +34,7 @@ token white_space::consume(tokenizer &tokens, void *data)
 	return result;
 }
 
-bool white_space::is_next(tokenizer &tokens, int i, void *data)
+bool white_space::is_next(tokenizer &tokens, int i, std::any data)
 {
 	return (tokens.peek_char(i) == '\t' || tokens.peek_char(i) == ' ');
 }

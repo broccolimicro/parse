@@ -1,24 +1,25 @@
 #pragma once
 
-#include "parse.h"
+#include <any>
+
+#include "schema.h"
 
 namespace parse {
 
 struct factory {
-	typedef void (*Register)(tokenizer&);
-	typedef void (*Expect)(tokenizer&);
-	typedef parse::syntax *(*Produce)(tokenizer&, void*);
-
-	const Register register_syntax;
-	const Expect expect;
-	const Produce produce;
-	void *data;
+	schema sub;
+	std::any data;
 
 	factory();
-	factory(const Register register_syntax, const Expect expect, const Produce produce, void *data=nullptr);
+	factory(schema sub, std::any data={});
 	~factory();
 
-	operator bool() const;
+	void register_syntax(tokenizer &tokens);
+	void expect(tokenizer &tokens);
+	parse::syntax *produce(tokenizer &tokens);
+	bool is_next(tokenizer &tokens, int i) const;
+	bool found(tokenizer &tokens) const;
+	bool empty() const;
 };
 
 struct registry {
@@ -27,3 +28,4 @@ struct registry {
 };
 
 }
+

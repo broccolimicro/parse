@@ -7,8 +7,25 @@
 
 #include "tokenizer.h"
 
-tokenizer::tokenizer()
-{
+expected_entry::expected_entry(std::string type, std::any data) {
+	this->type = type;
+	this->data = data;
+}
+
+expected_entry::~expected_entry() {
+}
+
+token_entry::token_entry(is_next_ptr next, consume_ptr consume, int type, bool keep) {
+	this->is_next = next;
+	this->consume = consume;
+	this->type = type;
+	this->keep = keep;
+}
+
+token_entry::~token_entry() {
+}
+
+tokenizer::tokenizer() {
 	segment_index = -1;
 	offset = -1;
 	num_errors = 0;
@@ -19,8 +36,7 @@ tokenizer::tokenizer()
 	export_messages = true;
 }
 
-tokenizer::tokenizer(bool export_messages)
-{
+tokenizer::tokenizer(bool export_messages) {
 	segment_index = -1;
 	offset = -1;
 	num_errors = 0;
@@ -31,9 +47,7 @@ tokenizer::tokenizer(bool export_messages)
 	this->export_messages = export_messages;
 }
 
-tokenizer::~tokenizer()
-{
-
+tokenizer::~tokenizer() {
 }
 
 void tokenizer::internal(string internal, string debug_file, int debug_line, int token_offset, int character_offset)
@@ -173,150 +187,130 @@ void tokenizer::token_log(string log, string debug_file, int debug_line, int cha
 	}
 }
 
-bool tokenizer::is_clean()
-{
+bool tokenizer::is_clean() {
 	return (num_internal == 0 && num_errors == 0);
 }
 
-void tokenizer::syntax_start(parse::syntax *syntax)
-{
+void tokenizer::syntax_start(parse::syntax *syntax) {
 	syntax->segment_name = segments[segment_index].name;
 	syntax->start = index[segment_index]+1;
 }
 
-void tokenizer::syntax_end(parse::syntax *syntax)
-{
-	if (syntax->start != -1)
-	{
+void tokenizer::syntax_end(parse::syntax *syntax) {
+	if (syntax->start != -1) {
 		syntax->end = index[segment_index];
 		syntax->valid = true;
 	}
 }
 
-bool tokenizer::save(string key, const parse::syntax *syntax)
-{
-	if (syntax == NULL || !syntax->valid)
+bool tokenizer::save(string key, const parse::syntax *syntax) {
+	if (syntax == NULL or not syntax->valid) {
 		return false;
-	else
-		return bookmarks.insert(pair<string, pair<string, int> >(key, pair<string, int>(syntax->segment_name, syntax->start))).second;
+	}
+	return bookmarks.insert(pair<string, pair<string, int> >(key, pair<string, int>(syntax->segment_name, syntax->start))).second;
 }
 
-bool tokenizer::load(const parse::syntax *syntax)
-{
-	if (syntax == NULL || !syntax->valid)
+bool tokenizer::load(const parse::syntax *syntax) {
+	if (syntax == NULL || !syntax->valid) {
 		return false;
+	}
 
 	bool found = false;
-	for (int i = 0; i < (int)segments.size() && !found; i++)
-		if (segments[i].name == syntax->segment_name)
-		{
+	for (int i = 0; i < (int)segments.size() and not found; i++) {
+		if (segments[i].name == syntax->segment_name) {
 			segment_index = i;
 			found = true;
 		}
+	}
 
-	if (found)
-	{
+	if (found) {
 		index[segment_index] = syntax->start;
 		return true;
 	}
-	else
-		return false;
+	return false;
 }
 
-bool tokenizer::load(string key)
-{
+bool tokenizer::load(string key) {
 	map<string, pair<string, int> >::iterator iter = bookmarks.find(key);
-	if (iter != bookmarks.end())
-	{
+	if (iter != bookmarks.end()) {
 		bool found = false;
-		for (int i = 0; i < (int)segments.size() && !found; i++)
-			if (segments[i].name == iter->second.first)
-			{
+		for (int i = 0; i < (int)segments.size() and not found; i++) {
+			if (segments[i].name == iter->second.first) {
 				segment_index = i;
 				found = true;
 			}
+		}
 
-		if (found)
-		{
+		if (found) {
 			index[segment_index] = iter->second.second;
 			return true;
 		}
-		else
-			return false;
 	}
-	else
-		return false;
+	return false;
 }
 
-bool tokenizer::erase(string key)
-{
+bool tokenizer::erase(string key) {
 	map<string, pair<string, int> >::iterator iter = bookmarks.find(key);
-	if (iter != bookmarks.end())
-	{
+	if (iter != bookmarks.end()) {
 		bookmarks.erase(iter);
 		return true;
 	}
-	else
-		return false;
+	return false;
 }
 
-void tokenizer::push()
-{
+void tokenizer::push() {
 	stack.push_back(pair<int, vector<int> >(segment_index, index));
 }
 
-void tokenizer::pop()
-{
-	if (stack.size() > 0)
-	{
+void tokenizer::pop() {
+	if (stack.size() > 0) {
 		segment_index = stack.back().first;
 		index = stack.back().second;
 		stack.pop_back();
 	}
 }
 
-tokenizer::level tokenizer::increment(bool required)
-{
-	expected_hierarchy.push_back(pair<vector<string>, bool>(vector<string>(), required));
+tokenizer::level tokenizer::increment(bool required) {
+	expected_hierarchy.push_back(pair<vector<expected_entry>, bool>(vector<expected_entry>(), required));
 	return (expected_hierarchy.end()-1);
 }
 
-tokenizer::level tokenizer::increment(level it, bool required)
-{
-	return expected_hierarchy.insert(it, pair<vector<string>, bool>(vector<string>(), required));
+tokenizer::level tokenizer::increment(level it, bool required) {
+	return expected_hierarchy.insert(it, pair<vector<expected_entry>, bool>(vector<expected_entry>(), required));
 }
 
-bool tokenizer::decrement(string debug_file, int debug_line, void *data)
-{
+bool tokenizer::decrement(string debug_file, int debug_line) {
 	pair<int, int> idx(-1, -1);
 
 	int max_required_level;
-	for (max_required_level = (int)expected_hierarchy.size()-1; max_required_level >= 0 && !expected_hierarchy[max_required_level].second; max_required_level--);
+	for (max_required_level = (int)expected_hierarchy.size()-1; max_required_level >= 0 and not expected_hierarchy[max_required_level].second; max_required_level--);
 
-	idx = expected(1, data);
-	if (idx.first < max_required_level && max_required_level == (int)expected_hierarchy.size()-1)
-	{
+	idx = expected(1);
+	if (idx.first < max_required_level && max_required_level == (int)expected_hierarchy.size()-1) {
 		string error_string = "expected ";
 		vector<string> expect_list;
-		for (int j = (int)expected_hierarchy.size()-1; j >= max_required_level; j--)
-		{
-			for (int k = 0; k < (int)expected_hierarchy[j].first.size(); k++)
-			{
-				if (expected_hierarchy[j].first[k].size() > 2 && expected_hierarchy[j].first[k][0] == '[' && expected_hierarchy[j].first[k][expected_hierarchy[j].first[k].size()-1] == ']')
-					expect_list.push_back(expected_hierarchy[j].first[k].substr(1, expected_hierarchy[j].first[k].size()-2));
-				else
-					expect_list.push_back("'" + expected_hierarchy[j].first[k] + "'");
+		for (int j = (int)expected_hierarchy.size()-1; j >= max_required_level; j--) {
+			for (int k = 0; k < (int)expected_hierarchy[j].first.size(); k++) {
+				std::string type = expected_hierarchy[j].first[k].type;
+				if (type.size() > 2 and type[0] == '[' and type.back() == ']') {
+					expect_list.push_back(type.substr(1, type.size()-2));
+				} else {
+					expect_list.push_back("'" + type + "'");
+				}
 			}
 		}
 
-		if (expect_list.size() > 0)
-		error_string += expect_list[0];
+		if (expect_list.size() > 0) {
+			error_string += expect_list[0];
+		}
 
-		for (int j = 1; j < (int)expect_list.size()-1; j++)
+		for (int j = 1; j < (int)expect_list.size()-1; j++) {
 			error_string += " " + expect_list[j];
+		}
 
-		if (expect_list.size() > 1)
+		if (expect_list.size() > 1) {
 			error_string += " or " + expect_list.back();
+		}
 
 		error(error_string, debug_file, debug_line, 1);
 
@@ -324,86 +318,80 @@ bool tokenizer::decrement(string debug_file, int debug_line, void *data)
 		vector<int> old_index = index;
 
 		string next_token;
-		while ((idx = expected(1, data)).first < max_required_level && (next_token = next()) != "");
+		while ((idx = expected(1)).first < max_required_level && (next_token = next()) != "");
 
-		if (next_token == "")
-		{
+		if (next_token == "") {
 			segment_index = old_segment;
 			index = old_index;
 		}
 	}
 
-	if (expected_hierarchy.size() == 0)
-	{
+	if (expected_hierarchy.size() == 0) {
 		string temp = segments[segment_index].get_token(index[segment_index] + 1);
 		next();
 		internal("nothing expected, found '" + temp + "'", debug_file, debug_line);
 		prev();
-	}
-	else if (idx.first != (int)expected_hierarchy.size() - 1)
-	{
+	} else if (idx.first != (int)expected_hierarchy.size() - 1) {
 		found_type = "";
 		expected_hierarchy.pop_back();
-	}
-	else
-	{
-		found_type = expected_hierarchy[idx.first].first[idx.second];
+	} else {
+		found_type = expected_hierarchy[idx.first].first[idx.second].type;
 		expected_hierarchy.pop_back();
 	}
 
 	return (found_type != "");
 }
 
-void tokenizer::expect(string s)
-{
-	expected_hierarchy.back().first.push_back(s);
+void tokenizer::expect(string type, std::any data) {
+	expected_hierarchy.back().first.push_back(expected_entry(type, data));
 }
 
-void tokenizer::expect(vector<string> &s)
-{
-	expected_hierarchy.back().first.insert(expected_hierarchy.back().first.end(), s.begin(), s.end());
+void tokenizer::expect(const vector<string> &types, std::any data) {
+	for (const string &type : types) {
+		expected_hierarchy.back().first.push_back(expected_entry(type, data));
+	}
 }
 
-void tokenizer::expect(level it, string s)
-{
-	it->first.push_back(s);
+void tokenizer::expect(level it, string type, std::any data) {
+	it->first.push_back(expected_entry(type, data));
 }
 
-void tokenizer::expect(level it, vector<string> &s)
-{
-	it->first.insert(it->first.end(), s.begin(), s.end());
+void tokenizer::expect(level it, vector<string> &types, std::any data) {
+	for (const string &type : types) {
+		it->first.push_back(expected_entry(type, data));
+	}
 }
 
-pair<int, int> tokenizer::expected(int i, void *data)
-{
+pair<int, int> tokenizer::expected(int i) {
 	vector<pair<int, int> > results;
-	if (segment_index >= 0 && segment_index < (int)segments.size())
-	{
-		for (int j = (int)expected_hierarchy.size()-1; j >= 0 && results.size() == 0; j--)
-		{
-			vector<string>::iterator j2;
+	if (segment_index >= 0 and segment_index < (int)segments.size()) {
+		for (int j = (int)expected_hierarchy.size()-1; j >= 0 and results.size() == 0; j--) {
+			vector<expected_entry>::iterator j2;
 			// Look for raw strings
-			for (j2 = expected_hierarchy[j].first.begin(); j2 != expected_hierarchy[j].first.end(); j2++)
-				if ((j2->size() <= 2 || j2->at(0) != '[' || j2->at(j2->size()-1) == ']') && segments[segment_index].get_token(index[segment_index] + i) == *j2)
+			for (j2 = expected_hierarchy[j].first.begin(); j2 != expected_hierarchy[j].first.end(); j2++) {
+				if ((j2->type.size() <= 2 || j2->type.at(0) != '[' || j2->type.at(j2->type.size()-1) == ']') && segments[segment_index].get_token(index[segment_index] + i) == j2->type) {
 					results.push_back(pair<int, int>(j, j2 - expected_hierarchy[j].first.begin()));
+				}
+			}
 
-			if (results.size() == 0)
-			{
+			if (results.size() == 0) {
 				// Look for specific token types
 				token_registry_iterator iter = token_registry.find(peek_type(i));
-				if (iter != token_registry.end())
-				{
-					j2 = std::find(expected_hierarchy[j].first.begin(), expected_hierarchy[j].first.end(), iter->first);
-					if (j2 != expected_hierarchy[j].first.end())
-						results.push_back(pair<int, int>(j, j2 - expected_hierarchy[j].first.begin()));
+				if (iter != token_registry.end()) {
+					for (int k = 0; k < (int)expected_hierarchy[j].first.size(); k++) {
+						if (expected_hierarchy[j].first[k].type == iter->first) {
+							results.push_back({j, k});
+						}
+					}
 				}
 
 				// Look for structures
-				for (syntax_registry_iterator iter = syntax_registry.begin(); iter != syntax_registry.end(); iter++)
-				{
-					j2 = std::find(expected_hierarchy[j].first.begin(), expected_hierarchy[j].first.end(), iter->first);
-					if (j2 != expected_hierarchy[j].first.end() && iter->second(*this, i, data))
-						results.push_back(pair<int, int>(j, j2 - expected_hierarchy[j].first.begin()));
+				for (syntax_registry_iterator iter = syntax_registry.begin(); iter != syntax_registry.end(); iter++) {
+					for (int k = 0; k < (int)expected_hierarchy[j].first.size(); k++) {
+						if (expected_hierarchy[j].first[k].type == iter->first and iter->second(*this, i, expected_hierarchy[j].first[k].data)) {
+							results.push_back({j, k});
+						}
+					}
 				}
 			}
 		}
@@ -412,7 +400,7 @@ pair<int, int> tokenizer::expected(int i, void *data)
 	if (results.size() > 1)
 	{
 		for (int i = 0; i < (int)results.size(); i++)
-			::note("", ::to_string(results[i].first) + " " + ::to_string(results[i].second) + " " + ::to_string(expected_hierarchy[results[i].first].second) + " " + expected_hierarchy[results[i].first].first[results[i].second], __FILE__, __LINE__);
+			::note("", ::to_string(results[i].first) + " " + ::to_string(results[i].second) + " " + ::to_string(expected_hierarchy[results[i].first].second) + " " + expected_hierarchy[results[i].first].first[results[i].second].type, __FILE__, __LINE__);
 		internal("ambiguous grammar", __FILE__, __LINE__, 1);
 		return pair<int, int>(-1, -1);
 	}
@@ -422,15 +410,15 @@ pair<int, int> tokenizer::expected(int i, void *data)
 	return pair<int, int>(-1, -1);
 }
 
-pair<int, int> tokenizer::expected(string s)
-{
-	for (int i = (int)expected_hierarchy.size()-1; i >= 0; i--)
-	{
-		vector<string>::iterator i2 = std::find(expected_hierarchy[i].first.begin(), expected_hierarchy[i].first.end(), s);
-		if (i2 != expected_hierarchy[i].first.end())
-			return pair<int, int>(i, i2 - expected_hierarchy[i].first.begin());
+pair<int, int> tokenizer::expected(string type) {
+	for (int i = (int)expected_hierarchy.size()-1; i >= 0; i--) {
+		for (int j = 0; j < (int)expected_hierarchy[i].first.size(); j++) {
+			if (expected_hierarchy[i].first[j].type == type) {
+				return {i, j};
+			}
+		}
 	}
-	return pair<int, int>(-1, -1);
+	return {-1, -1};
 }
 
 int tokenizer::number_expected(int max_required_level)
@@ -446,7 +434,7 @@ bool tokenizer::found(string s)
 	return (found_type == s);
 }
 
-void tokenizer::insert(string name, string contents, void *data)
+void tokenizer::insert(string name, string contents, std::any data)
 {
 	segment_index++;
 

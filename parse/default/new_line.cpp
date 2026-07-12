@@ -1,26 +1,17 @@
-/*
- * new_line.cpp
- *
- *  Created on: Oct 16, 2014
- *      Author: nbingham
- */
-
 #include "new_line.h"
 
-namespace parse
-{
-new_line::new_line()
-{
+#include "../token.h"
+
+namespace parse {
+
+new_line::new_line() {
 	debug_name = "new_line";
 }
 
-new_line::~new_line()
-{
-
+new_line::~new_line() {
 }
 
-token new_line::consume(tokenizer &tokens, void *data)
-{
+token new_line::consume(tokenizer &tokens, std::any data) {
 	token result;
 	result.type = tokens.token_type<new_line>();
 	result.start = tokens.offset+1;
@@ -31,8 +22,8 @@ token new_line::consume(tokenizer &tokens, void *data)
 	return result;
 }
 
-bool new_line::is_next(tokenizer &tokens, int i, void *data)
-{
+bool new_line::is_next(tokenizer &tokens, int i, std::any data) {
 	return (tokens.peek_char(i) == '\n');
 }
+
 }

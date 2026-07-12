@@ -1,27 +1,17 @@
-/*
- * block_comment.h
- *
- *  Created on: Oct 16, 2014
- *      Author: nbingham
- */
+#pragma once
 
-#include "../parse.h"
+#include "../tokenizer.h"
 
-#ifndef parse_default_block_comment_h
-#define parse_default_block_comment_h
+namespace parse {
 
-namespace parse
-{
-struct block_comment
-{
+struct block_comment {
+	string debug_name;
+
 	block_comment();
 	~block_comment();
 
-	string debug_name;
-
-	static token consume(tokenizer &tokens, void *data = NULL);
-	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
+	static token consume(tokenizer &tokens, std::any data=std::any());
+	static bool is_next(tokenizer &tokens, int i = 1, std::any data=std::any());
 };
-}
 
-#endif
+}

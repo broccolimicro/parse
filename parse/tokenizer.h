@@ -6,27 +6,29 @@
 #include "token.h"
 #include "syntax.h"
 
+#include <any>
+
 struct tokenizer;
 
-typedef bool (*is_next_ptr)(tokenizer&, int, void*);
-typedef token (*consume_ptr)(tokenizer&, void *);
+typedef bool (*is_next_ptr)(tokenizer&, int, std::any);
+typedef token (*consume_ptr)(tokenizer&, std::any);
 
-struct token_entry
-{
-	token_entry(is_next_ptr next, consume_ptr consume, int type, bool keep)
-	{
-		this->is_next = next;
-		this->consume = consume;
-		this->type = type;
-		this->keep = keep;
-	}
+struct expected_entry {
+	std::string type;
+	std::any data;
 
-	~token_entry(){}
+	expected_entry(std::string type="", std::any data=std::any());
+	~expected_entry();
+};
 
+struct token_entry {
 	is_next_ptr is_next;
 	consume_ptr consume;
 	int type;
 	bool keep;
+
+	token_entry(is_next_ptr next, consume_ptr consume, int type, bool keep);
+	~token_entry();
 };
 
 /** This structure splits up multiple input files onto a stream of
@@ -50,8 +52,8 @@ struct tokenizer
 
 	vector<pair<int, vector<int> > > stack;
 
-	vector<pair<vector<string>, bool> > expected_hierarchy;
-	typedef vector<pair<vector<string>, bool> >::iterator level;
+	vector<pair<vector<expected_entry>, bool> > expected_hierarchy;
+	typedef vector<pair<vector<expected_entry>, bool> >::iterator level;
 	string found_type;
 
 	map<string, pair<string, int> > bookmarks;
@@ -121,29 +123,28 @@ struct tokenizer
 
 	level increment(bool required = true);
 	level increment(level it, bool required = true);
-	bool decrement(string debug_file, int debug_line, void *data = NULL);
+	bool decrement(string debug_file, int debug_line);
 
-	void expect(string s);
-	void expect(vector<string> &s);
+	void expect(string type, std::any data=std::any());
+	void expect(const vector<string> &types, std::any data=std::any());
 	template <class type>
-	void expect()
+	void expect(std::any data=std::any())
 	{
-		if (!syntax_registered<type>() && !token_registered<type>())
+		if (not syntax_registered<type>() and not token_registered<type>())
 			internal("syntax or token not registered \"" + type().debug_name + "\"", __FILE__, __LINE__);
-		expected_hierarchy.back().first.push_back("[" + type().debug_name + "]");
+		expected_hierarchy.back().first.push_back(expected_entry("[" + type().debug_name + "]", data));
 	}
 
-	void expect(level it, string s);
-	void expect(level it, vector<string> &s);
+	void expect(level it, string type, std::any data=std::any());
+	void expect(level it, vector<string> &types, std::any data=std::any());
 	template <class type>
-	void expect(level it)
+	void expect(level it, std::any data=std::any())
 	{
 		if (!syntax_registered<type>() && !token_registered<type>())
 			internal("syntax or token not registered \"" + type().debug_name + "\"", __FILE__, __LINE__);
-		it->first.push_back("[" + type().debug_name + "]");
+		it->first.push_back(expected_entry("[" + type().debug_name + "]", data));
 	}
 	
-	pair<int, int> expected(int off = 1, void *data = NULL);
 	pair<int, int> expected(int off = 1);
 	pair<int, int> expected(string s);
 
@@ -156,7 +157,7 @@ struct tokenizer
 		return (found_type == ("[" + type().debug_name + "]"));
 	}
 
-	void insert(string name, string contents, void *data = NULL);
+	void insert(string name, string contents, std::any data=std::any());
 
 	bool is_next(string str, int i = 1);
 	template <class type>

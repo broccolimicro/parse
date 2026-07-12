@@ -19,7 +19,7 @@ line_comment::~line_comment()
 
 }
 
-token line_comment::consume(tokenizer &tokens, void *data)
+token line_comment::consume(tokenizer &tokens, std::any data)
 {
 	token result;
 	result.type = tokens.token_type<line_comment>();
@@ -40,7 +40,7 @@ token line_comment::consume(tokenizer &tokens, void *data)
 	return result;
 }
 
-bool line_comment::is_next(tokenizer &tokens, int i, void *data)
+bool line_comment::is_next(tokenizer &tokens, int i, std::any data)
 {
 	return (tokens.peek_char(i) == '/' && tokens.peek_char(i+1) == '/');
 }

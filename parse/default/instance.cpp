@@ -18,7 +18,7 @@ instance::~instance()
 {
 }
 
-token instance::consume(tokenizer &tokens, void *data)
+token instance::consume(tokenizer &tokens, std::any data)
 {
 	token result;
 	result.type = tokens.token_type<instance>();
@@ -33,7 +33,7 @@ token instance::consume(tokenizer &tokens, void *data)
 	return result;
 }
 
-bool instance::is_next(tokenizer &tokens, int i, void *data)
+bool instance::is_next(tokenizer &tokens, int i, std::any data)
 {
 	char character = tokens.peek_char(i);
 

@@ -1,27 +1,17 @@
-/*
- * instance.h
- *
- *  Created on: Oct 16, 2014
- *      Author: nbingham
- */
+#pragma once
 
-#include "../parse.h"
+#include "../tokenizer.h"
 
-#ifndef parse_default_instance_h
-#define parse_default_instance_h
+namespace parse {
 
-namespace parse
-{
-struct instance
-{
+struct instance {
+	string debug_name;
+
 	instance();
 	~instance();
 
-	string debug_name;
-
-	static token consume(tokenizer &tokens, void *data = NULL);
-	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
+	static token consume(tokenizer &tokens, std::any data=std::any());
+	static bool is_next(tokenizer &tokens, int i = 1, std::any data=std::any());
 };
-}
 
-#endif
+}

@@ -2,18 +2,35 @@
 
 namespace parse {
 
-factory::factory() : register_syntax(nullptr), expect(nullptr), produce(nullptr), data(nullptr) {
+factory::factory() = default;
+
+factory::factory(schema sub, std::any data) : sub(sub), data(data) {
 }
 
-factory::factory(const Register register_syntax, const Expect expect, const Produce produce, void *data) :
-	register_syntax(register_syntax), expect(expect), produce(produce), data(data) {
+factory::~factory() = default;
+
+void factory::register_syntax(tokenizer &tokens) {
+	sub.register_syntax(tokens);
 }
 
-factory::~factory() {
+void factory::expect(tokenizer &tokens) {
+	sub.expect(tokens, data);
 }
 
-factory::operator bool() const {
-	return register_syntax != nullptr and expect != nullptr and produce != nullptr;
+parse::syntax *factory::produce(tokenizer &tokens) {
+	return sub.produce(tokens, data);
+}
+
+bool factory::is_next(tokenizer &tokens, int i) const {
+	return sub.is_next(tokens, i, data);
+}
+
+bool factory::found(tokenizer &tokens) const {
+	return sub.found(tokens);
+}
+
+bool factory::empty() const {
+	return sub.empty();
 }
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "parse.h"
+#include "tokenizer.h"
 #include "syntax.h"
 
 #include <memory>
@@ -14,16 +14,20 @@ struct schema {
 
 	string label;
 
-	std::function<std::shared_ptr<syntax>(tokenizer&,void*)> factory;
-	std::function<bool(tokenizer&,int,void*)> is_next;
-	std::function<void(tokenizer&)> register_syntax;
+	using Produce = std::function<syntax*(tokenizer&,std::any)>;
+	using IsNext = std::function<bool(tokenizer&,int,std::any)>;
+	using RegisterSyntax = std::function<void(tokenizer&)>;
+
+	Produce produce;
+	IsNext is_next;
+	RegisterSyntax register_syntax;
 
 	template <typename T>
 	void set() {
 		label = "[" + T().debug_name + "]";
-		factory = [](tokenizer &tokens, void *data) -> std::shared_ptr<syntax> {
-			std::shared_ptr<syntax> result = std::make_shared<T>();
-			((T*)result.get())->parse(tokens, data);
+		produce = [](tokenizer &tokens, std::any data) -> syntax* {
+			T *result = new T();
+			result->parse(tokens, data);
 			return result;
 		};
 
@@ -31,6 +35,15 @@ struct schema {
 		register_syntax = &T::register_syntax;
 	}
 
+	template <typename T>
+	static schema from() {
+		schema result;
+		result.set<T>();
+		return result;
+	}
+
+	void expect(tokenizer &tokens, std::any data={});
+	bool found(tokenizer &tokens) const;
 	bool empty() const;
 };
 

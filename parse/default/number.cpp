@@ -19,7 +19,7 @@ number::~number()
 
 }
 
-token number::consume(tokenizer &tokens, void *data)
+token number::consume(tokenizer &tokens, std::any data)
 {
 	token result;
 	result.type = tokens.token_type<number>();
@@ -98,7 +98,7 @@ token number::consume(tokenizer &tokens, void *data)
 	return result;
 }
 
-bool number::is_next(tokenizer &tokens, int i, void *data)
+bool number::is_next(tokenizer &tokens, int i, std::any data)
 {
 	//if (tokens.peek_char(i) == '-')
 	//	i++;
