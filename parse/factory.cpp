@@ -9,7 +9,7 @@ factory::factory(schema sub, std::any data) : sub(sub), data(data) {
 
 factory::~factory() = default;
 
-void factory::register_syntax(tokenizer &tokens) {
+void factory::register_syntax(tokenizer &tokens) const {
 	sub.register_syntax(tokens);
 }
 

@@ -14,7 +14,7 @@ struct factory {
 	factory(schema sub, std::any data={});
 	~factory();
 
-	void register_syntax(tokenizer &tokens);
+	void register_syntax(tokenizer &tokens) const;
 	void expect(tokenizer &tokens);
 	parse::syntax *produce(tokenizer &tokens);
 	bool is_next(tokenizer &tokens, int i) const;
