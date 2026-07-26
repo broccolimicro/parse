@@ -15,8 +15,8 @@ struct factory {
 	~factory();
 
 	void register_syntax(tokenizer &tokens) const;
-	void expect(tokenizer &tokens);
-	parse::syntax *produce(tokenizer &tokens);
+	void expect(tokenizer &tokens) const;
+	parse::syntax *produce(tokenizer &tokens) const;
 	bool is_next(tokenizer &tokens, int i) const;
 	bool found(tokenizer &tokens) const;
 	bool empty() const;

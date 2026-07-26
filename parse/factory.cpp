@@ -13,11 +13,11 @@ void factory::register_syntax(tokenizer &tokens) const {
 	sub.register_syntax(tokens);
 }
 
-void factory::expect(tokenizer &tokens) {
+void factory::expect(tokenizer &tokens) const {
 	sub.expect(tokens, data);
 }
 
-parse::syntax *factory::produce(tokenizer &tokens) {
+parse::syntax *factory::produce(tokenizer &tokens) const {
 	return sub.produce(tokens, data);
 }
 

@@ -42,7 +42,7 @@ struct schema {
 		return result;
 	}
 
-	void expect(tokenizer &tokens, std::any data={});
+	void expect(tokenizer &tokens, std::any data={}) const;
 	bool found(tokenizer &tokens) const;
 	bool empty() const;
 };

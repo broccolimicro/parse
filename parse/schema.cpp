@@ -8,7 +8,7 @@ schema::schema() {
 schema::~schema() {
 }
 
-void schema::expect(tokenizer &tokens, std::any data) {
+void schema::expect(tokenizer &tokens, std::any data) const {
 	tokens.expect(label, data);
 }
 
