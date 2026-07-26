@@ -12,6 +12,11 @@ struct wrapper : parse::syntax {
 		this->debug_name = T().debug_name+"_syntax";
 	}
 
+	wrapper(std::string value) {
+		this->value = value;
+		this->debug_name = T().debug_name+"_syntax";
+	}
+
 	wrapper(tokenizer &tokens, std::any data) {
 		this->debug_name = T().debug_name+"_syntax";
 		parse(tokens, data);
