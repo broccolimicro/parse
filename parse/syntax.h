@@ -1,6 +1,7 @@
 #pragma once
 
 #include <common/standard.h>
+#include <memory>
 
 namespace parse {
 
@@ -36,6 +37,10 @@ struct syntax {
 	template <typename T>
 	const T &get() const {
 		return *((const T*)this);
+	}
+
+	std::shared_ptr<syntax> cloneShared() const {
+		return std::shared_ptr<syntax>(clone());
 	}
 };
 
