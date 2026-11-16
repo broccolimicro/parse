@@ -342,6 +342,10 @@ bool tokenizer::decrement(string debug_file, int debug_line) {
 	return (found_type != "");
 }
 
+void tokenizer::drop() {
+	expected_hierarchy.pop_back();
+}
+
 void tokenizer::expect(string type, std::any data) {
 	expected_hierarchy.back().first.push_back(expected_entry(type, data));
 }

@@ -124,6 +124,7 @@ struct tokenizer
 	level increment(bool required = true);
 	level increment(level it, bool required = true);
 	bool decrement(string debug_file, int debug_line);
+	void drop();
 
 	void expect(string type, std::any data=std::any());
 	void expect(const vector<string> &types, std::any data=std::any());
